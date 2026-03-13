@@ -48,10 +48,16 @@ if ! grep -q "$NODE_BIN" /home/$USERNAME/.bashrc 2>/dev/null; then
     echo "export PATH=\"$NODE_BIN:\$PATH\"" >> /home/$USERNAME/.bashrc
 fi
 
-# 6. Set git config for the user
-sudo -u "$USERNAME" HOME="/home/$USERNAME" git config --global user.name "kamilelukosiute"
-sudo -u "$USERNAME" HOME="/home/$USERNAME" git config --global user.email "lukosiutekamile@gmail.com"
-sudo -u "$USERNAME" HOME="/home/$USERNAME" git config --global --add safe.directory /workspace/bdt-finetuning-replication
+# 6. Set git config for the user (write directly to avoid sudo/HOME issues)
+install -o "$USERNAME" -g "$USERNAME" -m 644 /dev/null /home/$USERNAME/.gitconfig
+cat > /home/$USERNAME/.gitconfig <<'GITCFG'
+[user]
+	name = kamilelukosiute
+	email = lukosiutekamile@gmail.com
+[safe]
+	directory = /workspace/bdt-finetuning-replication
+GITCFG
+chown "$USERNAME:$USERNAME" /home/$USERNAME/.gitconfig
 
 # 7. Give user ownership of workspace (AFTER clone so repo is included)
 chown -R "$USERNAME:$USERNAME" /workspace/
