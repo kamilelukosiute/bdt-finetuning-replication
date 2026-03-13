@@ -8,7 +8,7 @@
 # Then SSH in and run:
 #   su - kamile
 #   cd /workspace/bdt-finetuning-replication
-#   claude
+#   claude --dangerously-skip-permissions
 set -euo pipefail
 
 USERNAME="kamile"
@@ -24,18 +24,14 @@ else
     echo "User $USERNAME already exists"
 fi
 
-# 2. Give user ownership of workspace
-chown -R "$USERNAME:$USERNAME" /workspace/
-echo "Set /workspace/ ownership to $USERNAME"
-
-# 3. Install Node.js if not present (needed for Claude Code)
+# 2. Install Node.js if not present (needed for Claude Code)
 if ! command -v node &>/dev/null; then
     echo "Installing Node.js..."
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
     apt-get install -y nodejs
 fi
 
-# 4. Install Claude Code
+# 3. Install Claude Code
 if ! command -v claude &>/dev/null; then
     npm install -g @anthropic-ai/claude-code
     echo "Installed Claude Code"
@@ -43,17 +39,23 @@ else
     echo "Claude Code already installed"
 fi
 
-# 5. Install Python deps into the container's environment
-pip install evo2 huggingface_hub tqdm pandas matplotlib seaborn scipy 2>/dev/null || true
+# 4. Install Python deps into the container's environment
+pip install evo2 huggingface_hub tqdm pandas matplotlib seaborn scipy biopython 2>/dev/null || true
 
-# 6. Add Node/npm bin to kamile's PATH so claude is available
+# 5. Add Node/npm bin to kamile's PATH (idempotent)
 NODE_BIN=$(dirname "$(which node)")
-echo "export PATH=\"$NODE_BIN:\$PATH\"" >> /home/$USERNAME/.bashrc
+if ! grep -q "$NODE_BIN" /home/$USERNAME/.bashrc 2>/dev/null; then
+    echo "export PATH=\"$NODE_BIN:\$PATH\"" >> /home/$USERNAME/.bashrc
+fi
 
-# 7. Set git config for the user
+# 6. Set git config for the user
 sudo -u "$USERNAME" git config --global user.name "kamilelukosiute"
 sudo -u "$USERNAME" git config --global user.email "lukosiutekamile@gmail.com"
 sudo -u "$USERNAME" git config --global --add safe.directory /workspace/bdt-finetuning-replication
+
+# 7. Give user ownership of workspace (AFTER clone so repo is included)
+chown -R "$USERNAME:$USERNAME" /workspace/
+echo "Set /workspace/ ownership to $USERNAME"
 
 echo ""
 echo "=== Done! ==="
