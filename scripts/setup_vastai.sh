@@ -42,11 +42,14 @@ fi
 # 4. Install Python deps into the container's environment
 pip install evo2 huggingface_hub tqdm pandas matplotlib seaborn scipy biopython 2>/dev/null || true
 
-# 5. Add Node/npm bin to kamile's PATH (idempotent)
+# 5. Add Node/npm bin to kamile's PATH (idempotent, in both .profile and .bashrc)
 NODE_BIN=$(dirname "$(which node)")
-if ! grep -q "$NODE_BIN" /home/$USERNAME/.bashrc 2>/dev/null; then
-    echo "export PATH=\"$NODE_BIN:\$PATH\"" >> /home/$USERNAME/.bashrc
-fi
+for rc in /home/$USERNAME/.profile /home/$USERNAME/.bashrc; do
+    if ! grep -q "$NODE_BIN" "$rc" 2>/dev/null; then
+        echo "export PATH=\"$NODE_BIN:\$PATH\"" >> "$rc"
+    fi
+done
+chown "$USERNAME:$USERNAME" /home/$USERNAME/.profile /home/$USERNAME/.bashrc
 
 # 6. Set git config for the user (write directly to avoid sudo/HOME issues)
 install -o "$USERNAME" -g "$USERNAME" -m 644 /dev/null /home/$USERNAME/.gitconfig
