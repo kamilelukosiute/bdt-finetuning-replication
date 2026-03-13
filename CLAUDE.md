@@ -1,5 +1,9 @@
 # Claude Code Project Instructions
 
+## Git rules
+- **DO NOT add Co-Authored-By lines to commits**
+- Use author: kamilelukosiute <lukosiutekamile@gmail.com>
+
 ## What this project is
 Replicating King et al. "Generative design of novel bacteriophages with genome language models" —
 specifically the supervised finetuning of Evo 2 7B on Microviridae genomes and the perplexity evaluation.

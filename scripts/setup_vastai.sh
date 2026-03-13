@@ -2,11 +2,13 @@
 # Vast.ai instance setup script
 # Run this as root BEFORE launching Claude Code
 #
-# Usage (after SSH'ing into Vast.ai as root):
-#   bash scripts/setup_vastai.sh
+# Usage as on-start script:
+#   git clone https://github.com/kamilelukosiute/bdt-finetuning-replication.git /workspace/bdt-finetuning-replication && bash /workspace/bdt-finetuning-replication/scripts/setup_vastai.sh
+#
+# Then SSH in and run:
 #   su - kamile
 #   cd /workspace/bdt-finetuning-replication
-#   claude  # launches Claude Code with full permissions
+#   claude
 set -euo pipefail
 
 USERNAME="kamile"
@@ -26,7 +28,14 @@ fi
 chown -R "$USERNAME:$USERNAME" /workspace/
 echo "Set /workspace/ ownership to $USERNAME"
 
-# 3. Install Claude Code if not present
+# 3. Install Node.js if not present (needed for Claude Code)
+if ! command -v node &>/dev/null; then
+    echo "Installing Node.js..."
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt-get install -y nodejs
+fi
+
+# 4. Install Claude Code
 if ! command -v claude &>/dev/null; then
     npm install -g @anthropic-ai/claude-code
     echo "Installed Claude Code"
@@ -34,12 +43,15 @@ else
     echo "Claude Code already installed"
 fi
 
-# 4. Install deps into the container's environment
+# 5. Install Python deps into the container's environment
 pip install evo2 huggingface_hub tqdm pandas matplotlib seaborn scipy 2>/dev/null || true
+
+# 6. Set git config for the user
+su - "$USERNAME" -c 'git config --global user.name "kamilelukosiute" && git config --global user.email "lukosiutekamile@gmail.com" && git config --global --add safe.directory /workspace/bdt-finetuning-replication'
 
 echo ""
 echo "=== Done! ==="
-echo "Now run:"
+echo "Now SSH in and run:"
 echo "  su - $USERNAME"
 echo "  cd /workspace/bdt-finetuning-replication"
 echo "  claude"
