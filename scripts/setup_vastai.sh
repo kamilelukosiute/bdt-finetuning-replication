@@ -49,9 +49,9 @@ if ! grep -q "$NODE_BIN" /home/$USERNAME/.bashrc 2>/dev/null; then
 fi
 
 # 6. Set git config for the user
-sudo -u "$USERNAME" git config --global user.name "kamilelukosiute"
-sudo -u "$USERNAME" git config --global user.email "lukosiutekamile@gmail.com"
-sudo -u "$USERNAME" git config --global --add safe.directory /workspace/bdt-finetuning-replication
+sudo -u "$USERNAME" HOME="/home/$USERNAME" git config --global user.name "kamilelukosiute"
+sudo -u "$USERNAME" HOME="/home/$USERNAME" git config --global user.email "lukosiutekamile@gmail.com"
+sudo -u "$USERNAME" HOME="/home/$USERNAME" git config --global --add safe.directory /workspace/bdt-finetuning-replication
 
 # 7. Give user ownership of workspace (AFTER clone so repo is included)
 chown -R "$USERNAME:$USERNAME" /workspace/
