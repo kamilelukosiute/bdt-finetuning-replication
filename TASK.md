@@ -16,12 +16,49 @@ Replicate the supervised finetuning (SFT) of Evo 2 7B on Microviridae (bacteriop
 - **Batch size**: 8 GPUs x 1 micro-batch x 4 grad_accum = 32 effective (matches paper)
 - **Budget**: $1000-2000
 
-## Workflow
+## Step 1: Eval pipeline (1x A100 80GB, ~$10)
 
-1. **Eval first**: Download published pretrained + finetuned models from HuggingFace, compute perplexity on train/test, reproduce the plot (1x A100, ~$10)
-2. **User reviews** eval results before proceeding
-3. **Train**: Full finetune on 8x H100 (~48 hrs, ~$960)
-4. **Evaluate** our finetuned model, compare to paper + published model
+Run these on the remote A100 in order:
+
+```bash
+# 1. Clone repo
+git clone git@github.com:kamilelukosiute/bdt-finetuning-replication.git
+cd bdt-finetuning-replication
+
+# 2. Install deps
+pip install torch evo2 huggingface_hub tqdm pandas matplotlib seaborn scipy
+
+# 3. Download dataset + models (~30GB total, takes a while)
+bash scripts/download_data.sh
+
+# 4. Prepare train/val/test splits
+python scripts/prepare_data.py
+
+# 5. Eval pretrained model
+python scripts/evaluate_perplexity.py --model-name evo2_7b --model-label Pretrained
+
+# 6. Eval finetuned model (append to same CSV)
+python scripts/evaluate_perplexity.py --model-name evo2_7b_microviridae --model-label FT-bacteriophages --append
+
+# 7. Generate plot
+python scripts/plot_perplexity.py
+```
+
+**>>> STOP: Review results/perplexity_plot.png before proceeding to training <<<**
+
+## Step 2: Training (8x H100 InfiniBand, ~$960)
+
+1. Provision 8x H100 (Voltage Park, Lambda, or wherever available)
+2. Clone repo, install Savanna + evo2 + DeepSpeed
+3. Download base model + tokenize data to mmap format
+4. Update paths in `configs/model_config.yml` and `configs/data_config.yml`
+5. Launch training via Savanna
+6. Monitor via wandb (set `WANDB_API_KEY` env var)
+
+## Step 3: Final evaluation
+
+1. Run eval script on our finetuned checkpoint
+2. Compare perplexity plot to paper + published HF model
 
 ## Key resources
 
