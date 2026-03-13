@@ -3,6 +3,7 @@
 ## Git rules
 - **DO NOT add Co-Authored-By lines to commits**
 - Use author: kamilelukosiute <lukosiutekamile@gmail.com>
+- **Push to git after making changes to scripts** — always commit and push script changes so they persist across instances
 
 ## What this project is
 Replicating King et al. "Generative design of novel bacteriophages with genome language models" —
@@ -10,15 +11,15 @@ specifically the supervised finetuning of Evo 2 7B on Microviridae genomes and t
 See TASK.md for full details.
 
 ## Where we are
-Step 1 (Eval Pipeline) has NOT been completed yet. We spent the first session fighting environment issues.
-The next Claude Code session should pick up from the very beginning of Step 1.
+Step 1 (Eval Pipeline) is IN PROGRESS. Data downloaded, splits prepared (14,266/100/100). Models downloaded to HF cache.
+Need to re-run on H100 instance (A100 fails due to FP8 requirement). Next session: run evaluate_perplexity.py for both models, then plot.
 
 ## What to do on a fresh Vast.ai instance
 
 ### Vast.ai configuration
 - **Docker image**: `nvcr.io/nvidia/pytorch:25.04-py3` (has PyTorch, CUDA, flash-attn, transformer-engine pre-installed)
 - **Disk**: 50GB minimum (80GB preferred) — models are ~14GB each
-- **GPU**: 1x A100 80GB for eval
+- **GPU**: 1x H100 80GB for eval (FP8 requires compute capability 8.9+; A100 is only 8.0)
 
 ### First-time setup (as root)
 ```bash
@@ -40,6 +41,7 @@ claude
 ## Critical lessons learned (DO NOT REPEAT)
 - **DO NOT install PyTorch** — the NGC image already has it with matching CUDA. Installing a second torch causes CUDA version mismatches and wastes disk/time.
 - **DO NOT build flash-attn from source** — takes hours on CPU-weak GPU instances. The NGC image already includes it.
+- **Evo2 7B requires H100 (not A100)** — the model uses FP8 via Transformer Engine, which needs compute capability 8.9+. A100 (8.0) fails with `AssertionError: Device compute capability 8.9 or higher required for FP8 execution`.
 - **Check disk space first** — `df -h /` before downloading large files. Models are ~14GB each.
 - **Check permissions first** — run `setup_vastai.sh` as root to give your user ownership of /workspace/.
 - Default Vast.ai images have tiny 16GB disk and CUDA toolkit mismatches — always use the NGC image above.
