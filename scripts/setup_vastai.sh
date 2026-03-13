@@ -46,8 +46,14 @@ fi
 # 5. Install Python deps into the container's environment
 pip install evo2 huggingface_hub tqdm pandas matplotlib seaborn scipy 2>/dev/null || true
 
-# 6. Set git config for the user
-su - "$USERNAME" -c 'git config --global user.name "kamilelukosiute" && git config --global user.email "lukosiutekamile@gmail.com" && git config --global --add safe.directory /workspace/bdt-finetuning-replication'
+# 6. Add Node/npm bin to kamile's PATH so claude is available
+NODE_BIN=$(dirname "$(which node)")
+echo "export PATH=\"$NODE_BIN:\$PATH\"" >> /home/$USERNAME/.bashrc
+
+# 7. Set git config for the user
+sudo -u "$USERNAME" git config --global user.name "kamilelukosiute"
+sudo -u "$USERNAME" git config --global user.email "lukosiutekamile@gmail.com"
+sudo -u "$USERNAME" git config --global --add safe.directory /workspace/bdt-finetuning-replication
 
 echo ""
 echo "=== Done! ==="
