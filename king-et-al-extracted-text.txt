@@ -1,0 +1,1989 @@
+--- Page 1 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Generative design of novel bacteriophages
+with genome language models
+Samuel H. King1,2, Claudia L. Driscoll1,3, David B. Li1,2, Daniel Guo1,4, Aditi T. Merchant1,2,
+Garyk Brixi1,5, Max E. Wilkinson6, and Brian L. Hie1,3,7,∗
+1ArcInstitute,PaloAlto,CA,USA
+2DepartmentofBioengineering,StanfordUniversity,Stanford,CA,USA
+3DepartmentofChemicalEngineering,StanfordUniversity,Stanford,CA,USA
+4DepartmentofComputerScience,StanfordUniversity,Stanford,CA,USA
+5DepartmentofGenetics,StanfordUniversity,Stanford,CA,USA
+6StructuralBiologyProgram,MemorialSloanKetteringCancerCenter,NewYork,NY,USA
+7StanfordDataScience,StanfordUniversity,Stanford,CA,USA
+Abstract
+Manyimportantbiologicalfunctionsarisenotfromsinglegenes,butfromcomplexinteractionsencoded
+by entire genomes. Genome language models have emerged as a promising strategy for designing
+biological systems, but their ability to generate functional sequences at the scale of whole genomes
+has remained untested. Here, we report the first generative design of viable bacteriophage genomes.
+Weleveragedfrontiergenomelanguagemodels,Evo1andEvo2,togeneratewhole-genomesequences
+withrealisticgeneticarchitecturesanddesirablehosttropism,usingthelyticphageΦX174asourdesign
+template. Experimental testing of AI-generated genomes yielded 16 viable phages with substantial
+evolutionary novelty. Cryo-electron microscopy revealed that one of the generated phages utilizes an
+evolutionarily distant DNA packaging protein within its capsid. Multiple phages demonstrate higher
+fitnessthanΦX174ingrowthcompetitionsandintheirlysiskinetics.Acocktailofthegeneratedphages
+rapidly overcomes ΦX174-resistance in three E. coli strains, demonstrating the potential utility of our
+approachfordesigningphagetherapiesagainstrapidlyevolvingbacterialpathogens.Thisworkprovides
+ablueprintforthedesignofdiversesyntheticbacteriophagesand,morebroadly,laysafoundationfor
+thegenerativedesignofusefullivingsystemsatthegenomescale.
+1. Introduction
+AdvancesinDNAsequencingandsynthesishavevastlyimprovedourabilitytoreadandwriteDNAatthescale
+ofwholegenomes(Edgaretal.,2022;Gibsonetal.,2008;Hutchisonetal.,2016;Richardsonetal.,2017;K.
+Wangetal.,2019). Whilethesetechnologiescouldalsofacilitatewhole-genomedesign,potentiallyenabling
+new biotechnologies or therapeutic modalities (Dedrick et al., 2019; Durrant et al., 2024; Mandell et al.,
+2015;Nyergesetal.,2023),intelligentlycomposingnovelgenomesstillrepresentsamonumentalchallenge.
+Genomes contain emergent complexity, wherein interactions involving multiple genes, regulatory elements,
+recognitionsequences,andotherfeaturesaretightlyorchestratedtoenablereplicationandotherhigher-order
+functions (Figure 1A) (Costanzo et al., 2016; Elena & Lenski, 1997; Jacob & Monod, 1961). Genomes are
+also highly sensitive to their sequence composition, as even a single mutation can render an entire genome
+nonviable (Barrell et al., 1976; Hutchison et al., 1999; Sanjuán et al., 2004). Despite efforts to design novel
+proteins, reprogram genetic codes, and engineer increasingly complex biological circuits (Dauparas et al.,
+2022; Fredens et al., 2019; Hayes et al., 2025; Hie et al., 2024; Ingraham et al., 2023; Jiang et al., 2024;
+Srinivasan&Smolke,2020),thereremainsnogeneralizableframeworkfordesigningentiregenomes.
+∗Correspondingauthor:brianhie@stanford.edu.
+1
+
+--- Page 2 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Recentadvancesinartificialintelligenceleveragedataandcomputeatscaletoenablecomplexgenerative
+tasks (Kaplan et al., 2020; Vaswani et al., 2017). In biology, language models trained on vast genomic se-
+quence datasets learn complex rules that enable the generative design of novel DNA sequences with desired
+functions(Brixietal.,2025;Merchantetal.,2024;Nguyen,Poli,Durrant,etal.,2024). Forexample,wehave
+previously reported the successful design of functional systems such as CRISPR-Cas complexes, transposable
+elements, and toxin-antitoxin interactions with the genomic language models, Evo 1 and Evo 2 (Merchant
+et al., 2024; Nguyen, Poli, Durrant, et al., 2024). However, these systems contain only a small number of
+genetic components, whereas the design of complete genomes would require new methodological advances
+andmuchdeeperintegrationofmachinelearning,computationalbiology,andexperimentalbiology.
+Here, we report the first generative design of complete genomes. We focused on the design of bacterio-
+phages,whichhavetremendousutilityasbiotechnologicaltoolsandhavetherapeuticrelevanceastreatments
+for bacterial infections (Dedrick et al., 2019; Kilcher & Loessner, 2019; Kim et al., 2025; Pires et al., 2016;
+Strathdee et al., 2023). As a design template, we selected ΦX174, a lytic Microviridae phage with a ~5.4
+kilobase(kb)genomecontaining11genes,atleastsevenregulatoryelements,andtworecognitionsequences
+(Jaschkeetal.,2019;Logel&Jaschke,2020;Sangeretal.,1977;Shlomai&Kornberg,1980). While ΦX174
+has a much more complex genetic architecture than any previously AI-generated biological system, its rela-
+tivelysmallgenomiclengthandrichhistoryofexperimentalwork(Kirchberger&Ochman,2023)alsomake
+ΦX174 a tractable and safe model for establishing whole-genome design. Notably, ΦX174 was the first com-
+plete DNA genome sequenced and synthesized (Sanger et al., 1977; Smith et al., 2003) and has continually
+served asa pivotalmodel withinmolecular biology(Barrell etal., 1976; Goulianet al., 1967; Jaschkeet al.,
+2012).
+Enabling generative design of complete bacteriophages first required substantial computational develop-
+ment of both generative models and bioinformatic prediction tools. Our full generative pipeline consisted of
+unsupervised pretraining with Evo 1 and Evo 2, task-specific fine-tuning on Microviridae genomes, prompt
+engineering with ΦX174-specific sequences, and inference-time guidance via predictive models of genomic
+architectureandhosttropism. Whole-genomebacteriophagedesignalsorequiredsubstantialdevelopmentof
+experimentalmethods,includinganovelprotocolthatenabledustoscreen∼300genomedesignstoyield16
+functionalphages,withtropismsuccessfullylimitedtothetargethost.
+The generated phages have substantial evolutionary novelty in their sequences and structures. Some of
+thesephagesalsohavefasterlysiskineticsthanΦX174ordirectlyoutcompeteΦX174inagrowthassay. Ina
+settinganalogoustopathogenresistancetophagetherapies,acocktailofourgeneratedphagesrapidlyover-
+came resistance in three different ΦX174-resistant E. coli strains, whereas ΦX174 alone could not overcome
+resistance. Theseresultsestablishgenerativegenomicsasapowerfulstrategyforaccessingnovelevolutionary
+spacesandforpotentiallycreatingeffectiveandevolutionarilyresilientphagetherapeutics.
+Morebroadly,thisstudyestablishesageneralizableapproachtogenerativegenomedesignundersteerable,
+user-specifiedconstraints. Weenvisionthattechniquesdevelopedinthisworkofferapathtowarddesigning
+more complex biological systems with desirable functions, potentially including the larger genomes of living
+organisms.
+2. Results
+2.1. Evocomposesrealisticbacteriophagegenomicsequences
+Genome-scale design is uniquely complex because it must reconcile features such as coding and noncoding
+elements, architectural arrangement, gene directionality, structural motifs, and even interactions with ele-
+ments not encoded in the designed sequence (Figure 1A). We hypothesized that, with advances in genome
+languagemodelsandwiththeappropriatetrainingdata,itwouldbepossibletolearnunderlyingevolutionary
+constraintsthatcouldallowforthegenerationofphagegenomesequencesnotyetseeninnature(Figure1B).
+Weinvestigated whetherEvo 1andEvo 2, whichwere pretrainedon largecorporaof DNAsequences in-
+cludingovertwomillionbacteriophagegenomes(Brixietal.,2025;Nguyen,Poli,Durrant,etal.,2024),had
+baselinecapabilityforgeneratingnovelphage-likesequences(Figure1C).Weleveragedspecialtaxonomicse-
+quencelabelsthatwereincludedalongsidegenomicsequencesduringpretraining(Brixietal.,2025;Nguyen,
+Poli, Durrant, et al., 2024) to specifically prompt the models to generate phage-like sequences, using three
+2
+
+--- Page 3 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure 1 | Evo composes realistic bacteriophage genomic sequences. (A) Key considerations highlight-
+ing the complexity of genome-scale design. (B) Generative genome language models have the potential to
+access novel phage genome design space when trained on a subset of observed natural evolution. (C) We
+benchmarked Evo 1 and Evo 2 on a broad zero-shot prompting task for phage genome design. (D) Gener-
+atedsequencesconsistentlyclassifiedasviralbygeNomad(left),withhighaveragevirusclassificationscores
+acrossprompts(right). D,Duplodnaviria;M,Monodnaviria;R,Riboviria. (E)Generatedsequencesshowlow
+query cover and sequence identity against natural sequences in nucleotide BLAST searches, indicating high
+novelty. (F) Generated sequences contain predicted phage-like architectures, with regions that match natu-
+ralsequences(blue)andnovelregionswithoutnucleotideBLASThits(gray). (G)Predictedcodingdensities
+of generated sequences are high, similar to natural sequences and unlike scrambled natural sequences. (H)
+ESMFold-predicted protein structures from generated sequences have mean predicted local distance differ-
+ence test (pLDDT) scores similar to natural proteins, substantially higher than scrambled natural sequence
+controls. (I) Generated proteins align to proteins in the OpenGenome and PHROGs databases with gener-
+allylowsequenceidentities,indicatinghighnovelty. (J)Functionalannotationsofgeneratedproteinsclosely
+matchthoseofnaturalphageswhenqueriedagainstthePHROGsdatabase.
+3
+
+--- Page 4 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+prompts corresponding to major viral realms: Duplodnaviria (double-stranded DNA viruses), Monodnaviria
+(single-strandedDNAviruses),andRiboviria(RNAviruses)(Figure1C;Methods).
+WefirstevaluatedwhetherthegeneratedsequencesresemblednaturalphagesequencesusinggeNomad,
+a widely used viral classification tool (Camargo et al., 2023). As a baseline, geNomad reliably classified
+89–100%ofnaturalphagesequencesasviraldependingontherealm(geNomadmeanscore>0.96),whereas
+controls consisting of scrambled natural sequences were rarely classified as viral (1.9–11%, mean score >
+0.73) (Figure S1A). In contrast, 19–33% of Evo 1 generations were classified as viral (mean score > 0.80)
+and 34–38% of Evo 2 generations were classified as viral (mean score > 0.87), depending on the prompt
+(Figure1D).Theseresultsdemonstratethatbothpretrainedmodelscangeneratephage-likesequences,with
+Evo2showingstrongerbaselineperformance.
+Querying generated sequences against the nucleotide BLAST database (Camacho et al., 2009) revealed
+thatgeneratedsequencesaredistinctfromthoseinnature(Figure1E,F).Despitetheirnovelty,thesequences
+retainedahighpredictedcodingdensityandgeneticfeaturesreminiscentofnaturalphagegenomes(Figure
+1F,G). Structure prediction (Lin et al., 2023) of the proteins generated by both Evo 1 and Evo 2 yielded
+predictedconfidencescoresconsistentwiththoseexpectedforstructurepredictionofnaturalproteins(Figure
+1H; Figure S1B). When compared to proteins in the Evo models’ pretraining data, OpenGenome (Brixi et
+al., 2025; Nguyen, Poli, Durrant, et al., 2024), and to proteins in the PHROGs database, a comprehensive
+databaseofphageproteins(Terzianetal.,2021),generatedproteinsgenerallyshowedlowsequenceidentity
+witharealisticdiversityofgeneannotations(Figure1I,J).Together,thesedatademonstratethatpretrained
+Evo models can design biologically realistic phage genomic sequences while introducing sequence diversity
+beyondnaturalevolution.
+2.2. Generativedesignofnovelbacteriophageswithtargethosttropism
+Wenexthypothesizedthatgenerativegenomicdesign,withappropriatetemplatesandconstraints,couldpro-
+pose novel, complete, and viable phage genomes (Figure 2). To achieve bacteriophage design, we devised
+a workflow (Figure 2A) that consists of: (1) selecting a target host of biological or therapeutic interest, (2)
+choosingadesigntemplate—aphagegenomeknowntoinfectthathost—andcollectingevolutionarilyrelated
+sequencedata,(3)trainingorfine-tuningagenomelanguagemodelonthatsequencedata,(4)establishing
+design constraints based on the design template, (5) computationally evaluating and filtering generated se-
+quencesusingthoseconstraints,and(6)experimentallyvalidatingthedesignedgenomes.
+Following these steps, we selected E. coli C and its native phage ΦX174 as our design template (Figure
+2B).ΦX174isawell-studiedphagethatbelongstoMicroviridae,afamilyofphageswithsmallgenomicsizes
+(typically∼4-6kb)andanabundanceofavailablesequencingdata(FigureS2A)(Bristeretal.,2015;Kirch-
+berger & Ochman, 2023), while E. coli C is a non-pathogenic, well-characterized host strain (Michel et al.,
+2010). ThesefeaturesmakeΦX174andE.coliCanidealtestbedforgenerativephagedesign.
+Giventhesuccessofpreviousdesigntasksthatrequiredsupervisedfine-tuning(SFT)togeneratecoherent
+CRISPR-Cas systems and transposable elements (Nguyen, Poli, Durrant, et al., 2024), we fine-tuned Evo 1
+7B 131K and Evo 2 7B 8K on a dataset of approximately 15 thousand Microviridae sequences (Figure 2C;
+Figure S2B; Figure S3A–F), resulting in higher fidelity language modeling of ΦX174-like genomes (Figure
+S3G,H). We then sampled sequences from the Microviridae SFT models, leveraging the property that they
+weretrainedtoinitiatefull-lengthgenomegenerationfromtheveryfirstpositionoftheirinputcontext. While
+the genomic start sequences of all Microviridae sequences in the training data were highly diverse, all of the
+ΦX174-likegenomesstartedwiththesameconsensusnucleotides(Figure2D).Bypromptingwithaportion
+of this consensus sequence, we were able to generate ΦX174-like sequences with both Evo 1 and Evo 2 SFT
+models. Incontrast,thebasemodelsfailedtorecallΦX174acrossalltestedlengthsoftheconsensussequence
+prompt(Figure2E).
+ToassessthequalityofgeneratedDNAsequences,wedevelopedasetofgenome-leveldesignconstraintsby
+computingvariousstatisticsonnaturalMicroviridaesequences, including ΦX174(Figure 2F).Weorganized
+these constraints into three tiers: sequence quality, tropism specificity, and evolutionary diversity. As basic
+sequencequalitycontrol,wefilteredoutgeneratedsequencescontainingnon-nucleotidecharacters,enforced
+lengths between 4–6 kb and GC content within 30–65%, and excluded sequences with DNA homopolymers
+longerthan10bases.
+4
+
+--- Page 5 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure2 | Generativedesignofnovelbacteriophageswithtargethosttropism. (A)Phagegenomedesign
+workflow. (B) Genetic architecture of our design template, ΦX174, a Microviridae phage that uses E. coli C
+as a host. (C) For our generation strategy, we specialized Evo 1 and Evo 2 on Microviridae genomes through
+supervised fine-tuning (SFT) to enhance its ability to generate ΦX174-like sequences. (D) Sequence logos
+showing conserved nucleotides at the start of ΦX174 variant genomes compared to Microviridae genomes in
+ourtrainingdata. (E)IncreasingthenumberofΦX174nucleotidesinthepromptquicklyimprovesrecallwith
+theSFTmodelswhereasthebasemodelsfailtorecallΦX174acrossallpromptlengths. (F)Designconstraints
+selectedforgenomefiltering, withthresholds(blue)chosenagainstnaturalMicroviridaedistributions(gray)
+and ΦX174(dottedline). (G)Benchmarkingofsixgenepredictionmethodsonthegenomeof ΦX174shows
+thatoverlappinggenesaresystematicallymissed,requiringustocreateanewmethodthatpredictsallgenes
+in ΦX174. (H)Finalfilteringandevaluationstepsforgeneratedgenomes. (I)Maximumsequenceretention
+rateacrossEvo1and2SFT-generatedsequencesafterapplyingdesignconstraints,withnaturalMicroviridae,
+scrambled Microviridae, and ΦX174 variant (vars.) controls. The selected design constraints retain ΦX174-
+likesequencesacrossqualitycontrol,tropism,anddiversificationfilters. (J–K)Generatedsequenceshavehigh
+Shannondiversityaftertropismfiltering(J)andmaintainahighretentionrateevenafterfurtherdiversifica-
+tionfiltering(K).Diversityandretentionratebothincreasewithgenerationtemperatureandpromptlength.
+Microviridae,scrambledMicroviridae,andΦX174variantsareshownforcomparison. 𝑛=1000sequencesper
+parametercombination.
+5
+
+--- Page 6 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+We also sought to add constraints on the protein-coding genes of our generated genomes. However, we
+foundthatnoneofsixbroadlyusedgeneannotationtoolswereabletoannotateall11genesonthewild-type
+ΦX174 sequence (Figure 2G; Figure S4A), reflecting the challenge of predicting overlapping open reading
+frames (ORFs) (Figure S4A,B) (Wright et al., 2022). To overcome this limitation, we built a bespoke CDS
+prediction method tailored to ΦX174-like sequences (Figure S4C; Methods) that was able to fully annotate
+all genes in ΦX174, with the exception of gene A*, which was partially predicted. With our new method,
+we applied an additional quality control constraint requiring at least seven predicted protein hits to natural
+ΦX174 proteins. Because host range is largely determined by the ability of viral spike proteins to bind host
+cellreceptors(Micheletal.,2010;Sunetal.,2017),weappliedatropismconstraintrequiringthatgenerated
+genomesencodespikeproteinswithmoderatelyhighsequenceidentity(≥ 60%)tothe ΦX174spikeprotein
+(Figure2F).
+We encouraged evolutionary novelty by introducing an optional set of diversification filters (Figure 2F).
+Wepreferredgenomeswith<95%averageaminoacididentity(AAI)tonaturalproteins,directlypromoting
+divergedproteomesequences. Wealsodevelopeda“geneticarchitecture”constrainttocapturepreservation
+of global gene arrangement relative to ΦX174 that we used to remove sequences that too closely resembled
+ΦX174(Figure2F;FigureS5;Methods). Wefavoredgenomeswith10or12genesintotalorthosesharing
+syntenywith10or12ofΦX174’sgenes,allowingforvariantswithsinglegenelossesorgains.
+With our full set of design constraints, we narrowed the set of generated sequences through successive
+rounds of quality control, tropism filtering, and diversification filtering (Figure 2H). These filters also sepa-
+rated natural ΦX174-like sequences from other Microviridae genomes and scrambled Microviridae sequences
+(Figure2I).Aftertropismfiltering,weretainedasmuchas100%oftheEvo1SFTgenerationsand53.8%of
+the Evo 2 SFT generations. After diversification-based filtering, we retained 10.4% of Evo 1 generations and
+17.2%ofEvo2generations.
+Finally, building on our prior finding that sequence context strongly influences generative outputs (Mer-
+chant et al., 2024), we systematically assessed how prompt length alongside autoregressive sampling tem-
+perature influenced the diversity and quality of generated genomes. We found that prompting with the first
+nine or more nucleotides from the ΦX174 consensus sequence (Figure 2D) led to simple, memorized recall
+of ΦX174 with minimal diversity at low sampling temperatures (Figure S6). In contrast, prompting with
+only the first one or two nucleotides from the consensus sequence did not provide sufficiently strong condi-
+tioningtoproduce ΦX174-likegenerations. Notably,steeringtowarddiverse, ΦX174-likesequencesrequired
+carefullytuningthelengthoftheconsensus-sequenceprompttobearound4–9nucleotidesandthesampling
+temperaturetobeinthe0.7–0.9range(Figure2J;Figure2K;FigureS6).
+BothEvo1andEvo2SFTmodelsproducedhighlydiversesequencepopulationsevenaftertropismfiltering,
+withShannondiversity,ameasureofspeciesbiodiversity(Peet,1974),increasingalongsidetemperatureand
+promptlength(Figure 2J).Importantly,thisdiversitydidnotcomeatthecostofdesignquality,withahigh
+percentage of sequences being retained after applying our diversification filters (Figure 2K). In total, these
+analyses show that by combining steerable generation with systematic design constraints, Evo models can
+proposephagegenomesthatarerealistic,template-guided,andevolutionarilynovel.
+2.3. Creatingfunctionalgeneratedbacteriophagegenomes
+Beyondcomputationaldesign,wethensoughttoexperimentallytestwhetherthegeneratedgenomesencode
+viable phages (Figure 3). Using our evaluation criteria, we curated a set of 302 diverse generated phage
+genomecandidates(FigureS7;FigureS8). Wedesignatedthesephages‘Evo-Φ’followedbyauniquenumeric
+sequence identifier. These genomes spanned 4–6 kb in length, have average amino acid identities (AAIs) to
+natural proteins as low as 63%, and retained spike protein sequence identities largely above 85% (Figure
+3A).Mostcandidatessharedmorethan40%nucleotideidentitywithΦX174andgenomesintheMicroviridae
+trainingdata. CheckV,atoolforassessingthequalityofviralsequences,classifiedover87%ofthegenerated
+sequences as High Quality or Complete (Nayfach et al., 2021). Many of the generated genes also shared no
+codingsequencesimilaritywithanygeneinΦX174,resultinginbreaksinsynteny(Figure3B).Mostgenomes
+encoded11genesintotal,with10preservingsyntenywithΦX174(Figure3C).
+Wedevelopedagrowthassayfortestingphagereplicationandlysissimilartopreviouslyestablishedphage
+rebootingprotocols(Figure3D)(Faberetal.,2019;Leuvenetal.,2021). AmatureΦX174virioncontainsa
+6
+
+--- Page 7 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure 3 | Creating functional generated bacteriophage genomes. (A) Final generated phage candidates
+meet our quality criteria while capturing abundant sequence diversity. kb, kilobase; Med., Medium; Comp.
+Complete. (B) Many generated sequences encode genes with low sequence identity to ΦX174, resulting
+in breaks in gene synteny. (C) A heatmap of total gene count versus number of syntenic genes shows that
+most sequences contain a single-gene break in synteny to ΦX174, balancing conservation with novelty. (D)
+Workflowforexperimentalvalidationofgeneratedphagegenomes. (E)E.coliCtransformedwithsynthesized
+ΦX174genomeassembliesshowthatphageplaquesrobustlyformacrossassemblyconditions. Incontrast,the
+same genomes but with loss-of-function mutations in lysis genes do not form plaques. ng, nanogram; frag.,
+fragment. (F)GrowthcurvesofE.coliCtransformedwithnophage(gray), ΦX174lysismutant(mut., light
+blue),orwild-typeΦX174(darkblue)genomeassemblyrevealstronggrowthinhibitionbyΦX174.Datapoint,
+mean OD 600 value; error bar, standard deviation; 𝑛 = 3 growth replicates. (G) Growth curves of generated
+genomeassembliestransformedinE.coliCexhibitingstronggrowthinhibition. (H)Representativetitrations
+ofpropagatedphagecandidates. (I)GrowthinhibitionmeasuredbyOD
+600
+at6hoursafterinfectionofE.coli
+cultureswithnophage,ΦX174,orgeneratedphagesshowsthatΦX174andgeneratedphagesinhibitgrowth
+inthetargetstrainE.coliC,andinE.coliW,butnotinsixotherstrainstested,demonstratingtherobustness
+oftropismfiltering. Eachcolumnisaninfectionreplicate.
+7
+
+--- Page 8 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+circularsingle-strandedgenomethatbecomesdouble-strandedduringreplication(Fiers&Sinsheimer,1962;
+Wickner&Hurwitz,1974),astagethatenablesphagerebootingthroughtransformationofacirculardouble-
+strandedDNA(dsDNA)product(Faberetal.,2019;Leuvenetal.,2021)thatwecanobtainviainvitroassem-
+blyofdsDNAfragments(Figure3D).Withthisprotocol,weobservedthatgenomesofΦX174robustlyformed
+plaques on a plate of E. coli C, whereas variants with mutated lysis genes did not (Figure 3E; Figure S9A).
+Inourgrowthinhibitionassay, ΦX174impededgrowthofE.coliCinlessthantwohours(Figure 3F).Upon
+successfulgrowthinhibition,wecreatedastockofthephage-infectedculture,verifieditsidentitybylong-read
+sequencing,thenpropagatedandtitratedthephagefordownstreamassays(FigureS9B,C;Methods).
+Uponvalidatingourscreeningprotocolwithwild-typeΦX174,wesuccessfullysynthesizedandassembled
+285 out of 302 generated genomes; the remaining failed due to high-complexity DNA synthesis. Measuring
+bacterialgrowthinhibitionasanindicationofphageviability,weobserved16generatedphagetransformations
+that inhibited growth of E. coli C (Figure 3G; Figure S10A). When transformed in E. coli K-12, none of the
+285assembliesresultedingrowthinhibition,supportingtherobustnessofthetropismconstraintfilter(Figure
+S10B).Sequence-verificationofthe16candidatesrevealedninegenomeswithnoacquiredmutations,whereas
+theothersevenacquiredsomesinglenucleotidevariants(SNVs)ordeletionswithrespecttothesynthesized
+sequences (Figure S11). The generated phages also showed variable titers when propagated (Figure 3H;
+FigureS12).
+Finally, we tested the host range of the generated phages across eight E. coli strains, including E. coli C,
+E.coliB,E.coliW,andfivevariantsofE.coliK-12(Figure3I;FigureS13). Surprisingly,ΦX174and15outof
+16ofthegeneratedphagescouldalsoinhibitgrowthinE.coliW,ahostnotpreviouslyassociatedwithΦX174
+(Archer et al., 2011; Michel et al., 2010), although with much more variation in growth kinetics (Figure
+S13). We did not observe growth inhibition in the other six E. coli strains, suggesting that the generated
+phages maintain a high specificity for the intended host, E. coli C. More broadly, these results demonstrate
+that genomelanguage models, combinedwith inference-time steeringand filtering, candesign viable phage
+genomes.
+2.4. Generatedbacteriophagesrevealsequenceandstructuralinsights
+Having validated the viability of our generated phages, we next examined the extent of their evolutionary
+novelty (Figure 4). Upon analyzing the mutational differences within the generated genomes relative to
+ΦX174andotherMicroviridaephages(Figure4A–D),weobservedhundredsofsynonymous,nonsynonymous,
+andnoncodingmutations(Figure4A)thatinclude:
+• anovelgeneJinsertioninEvo-Φ63;
+• extendednoncodingregionsinEvo-Φ63,Evo-Φ2147,Evo-Φ2483,andEvo-Φ2498;
+• lossofgeneKinEvo-Φ114;
+• large,putativetruncationsofgeneCinEvo-Φ75andEvo-Φ100,andofgeneBinEvo-Φ316;
+• large,putativeelongationsofgeneEinEvo-Φ4andEvo-Φ46;and
+• swapping of gene J in Evo-Φ36 with gene J from Escherichia phage G4, a swap previously found non-
+viableforwild-typeΦX174(Faneetal.,1992;Ogunbunmietal.,2021;Roznowskietal.,2020).
+The most mutated elements amongst the 16 genomes were promoter A, terminator H, and gene J, with
+averagemutationratesof0.11,0.09,and0.07mutationspernucleotide,respectively(Figure4B).Theregu-
+latoryelementsofTerminatorJandtheoriginofreplication(ori)weretheleastmutated,withnomutations
+across all sixteen genomes. The generated genomes also had a range of lengths, from 99% to 105% of the
+lengthofΦX174(Figure4C).
+WhenwecomparedthegeneratedgenomestoMicroviridaesequencesinthetrainingdata,theycontained
+between 67 and 392 novel mutations, with nucleotide sequence identities between 93.0% and 98.8% (Fig-
+ure 4D). The nearest natural genomes to the generated genomes consisted of several Microviridae phages
+that infect E. coli, including ΦX174, NC41, NC5, NC51, and S13 (Figure 4E). Evo-Φ2147 has 392 muta-
+tions—representing 93.0% average nucleotide identity (ANI)—with respect to its nearest natural genome
+(Figure 4D), phage NC51; notably, natural genomes with less than 95% ANI to any known phage would
+typicallyqualifyasanewspecies(Turneretal.,2021).
+Interestingly,over50generatedsequencesthatwerenotviableinourgrowthinhibitionscreenscontaineda
+8
+
+--- Page 9 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure4 | Generatedbacteriophagesrevealsequenceandstructuralinsights. (A)Syntenyplotof ΦX174
+andfunctionalgeneratedbacteriophages,highlightinghundredsofsynonymous(lightblue),nonsynonymous
+(darkblue),andnoncoding(red)mutationscomparedtoΦX174. Genomesareinorderbyname. (B)Average
+nucleotide (nt) mutational frequencies, normalized to length, of structural proteins, non-structural proteins,
+andregulatoryelementsacrossthegeneratedphagegenomesshowthatgeneJandregulatoryelementsare
+mutationalhotspots. (C)Generatedgenomesexhibitarangeoflengths. Dottedline,genomelengthofΦX174;
+white dot, median; gray box, interquartile range (IQR); whiskers, 1.5× IQR. (D) Percent sequence identity
+andnumberofnovelmutationsoffunctional(blue)andnon-functional(gray)generatedsequencescompared
+to their top nucleotide BLAST hit in the Microviridae training data. (E) Neighbor-joining phylogenetic tree
+offunctionalgeneratedphages(lightblue)andrepresentativeMicroviridaephages(darkblueandpink). (F)
+Percentcumulativesequencecoverageofgeneratedphageshighlightsthatmutationsinmostgeneratedphages
+cannot be completely attributed to mutations seen in nature. The sequences were aligned to sequences by
+nucleotideBLASTinthecore_ntdatabaseuntilallnucleotideswereaccountedforortherewerenosignificant
+hits for remaining nucleotides. (G–H) Synteny plot (G) and detailed view of gene J (H) and its surrounding
+intergenic regions of ΦX174, Evo-Φ36, and phage G4, with single nucleotide variations (SNVs) compared to
+ΦX174 highlighted in blue. (I) Cryo-EM density map of Evo-Φ36 virion, highlighting individual subunits of
+thespike(pink)andcapsid(yellow). Remainingspikes(lightblue)andcapsids(gray)areshown. (J)Interior
+surfaceviewofthecapsid(F,gray)andspike(G,notvisible)pentamersofEvo-Φ36(left)andΦX174(right),
+with their cognate J proteins (purple) reveals distinct capsid interactions and putative genome packaging
+modesbetweenthetwophagesasmodeledintothecryo-EMdensitymap. (K)AsymmetricunitsincludingF,
+G,andJofEvo-Φ36(left)andΦX174(right)showresolvedresiduesofJ.
+9
+
+--- Page 10 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+comparablenumberorfewermutationsthantheviablegeneratedphageswhenalignedtotheirnearestnatural
+genomes,highlightingthedifficultyofdesigningfunctionalmutationsatthegenome-scale. Further,mutations
+in 13 of the generated genomes could not be recapitulated from any known natural sequences (Figure 4F;
+FigureS14),includinglargeportionsofthenovelnoncodingregionsinEvo-Φ63,Evo-Φ2147,andEvo-Φ2483.
+Together,theseresultsdemonstratetheabilityofgenomelanguagemodelstodesigncompletegenomeswith
+highsequencenovelty.
+Beyond genetic diversity, we examined structural novelty in the generated phages. In Evo-Φ36, gene J, a
+genome-packagingproteinthatalsosupportsthecapsid(Bernaletal.,2004),wasreplacedwithahomologous
+proteinfoundinphageG4,differingbyfoursynonymousSNVs. Yet,theJ–Fintergenicregionremainedmore
+similar to ΦX174 (Figure 4G,H). G4 is a distantly related Microvirus with only 63.0% genome identity to
+ΦX174 (Figure S15A) (Godson et al., 1978), whereas Evo-Φ36 shares 96.9% identity with ΦX174. The G4
+J protein is 25 amino acids long compared to 38 amino acids in ΦX174, lacking portions of domains 0 and
+I that contribute to capsid binding in ΦX174 (Figure S15B) (Bernal et al., 2004; Ogunbunmi et al., 2021).
+Interestingly,priorworkhasshownthatswappingG4JintoΦX174isnotviable(Faneetal.,1992;Ogunbunmi
+et al., 2021; Roznowski et al., 2020). Remarkably, Evo-Φ36 is viable despite encoding the G4 J, highlighting
+Evo’sabilitytodesigngenomesthatintegratecontext-dependentstructuralcompatibility.
+Given the unusually small J protein in Evo-Φ36, we sought to understand its structural consequences.
+AlphaFold 3 revealed strikingly different orientations of J in the capsid pentamers of Evo-Φ36 compared to
+ΦX174 and G4 (Figure S15C–E) (Abramson et al., 2024). To further explore these interactions, we solved
+the structure of ΦX174 to a resolution of 2.8 Å and Evo-Φ36 to a resolution of 2.9 Å by cryogenic electron
+microscopy(cryo-EM)(Figure4I;FigureS16;FigureS17;FigureS18;TableS1). Consistentwithprevious
+findings (McKenna et al., 1992), we observed that the hydrophobic C-terminus of the J protein in ΦX174,
+domain II, interacts with the interior surface of the capsid, while the more basic domains 0 and I tether the
+genomicDNAwhilestructurallysupportingthecapsid(Figure 4J,K;Figure S19). Despiteintroducingmore
+polarityatthecapsid-JinterfacebysubstitutionoftheC-terminalF→Y,Evo-Φ36Jmaintainsasimilaroverall
+binding mode at its C-terminus (Figure 4K). Notably, we could not resolve 14 residues at the N-terminus of
+Evo-Φ36 J, whereas the corresponding residues in ΦX174 J visibly interact with the capsid. This difference
+suggeststhattheEvo-Φ36N-terminusislikelyunstructuredwithrespecttothecapsidandprimarilyfunctions
+in DNA binding. Taken together, these findings show that despite divergent sequence contexts, Evo-Φ36 J
+preservesacompatibleinteractionwithitscapsid,denotinghowgenerativedesigncanuncovernovelprotein-
+proteinco-evolutionarysolutions.
+2.5. Generatedbacteriophagesexhibithighfitness
+Generative genomics can propose novel genetic sequences, including large-scale sequence changes, that are
+not constrained by natural selection pressures. We therefore hypothesized that functional mutations in the
+generatedphagegenomesmightconferfitnessadvantagesrelativetowild-type ΦX174(Figure 5). Wecom-
+peted ΦX174andallgeneratedphagesagainsteachotherinasingleE.coliCpopulationbyco-infectingthe
+16 generated phages and ΦX174 at equal multiplicity of infection (MOI) and measuring the cumulative fold
+change (FC) in sequencing read counts of each phage over time (Figure 5A). At the end of a competition,
+phageswiththehighestcumulativeFCarethosethathadthelargestrelativeincreaseintheirownpopulation
+size,indicatinghighfitness.
+We observed that three generated phages, Evo-Φ69, Evo-Φ100, and Evo-Φ111, appeared in the top five
+phagesattheendofthreeindependentcompetitionexperiments(Figure5B–D).ΦX174onlyappearedinthe
+topfivephagesincompetitions1and3,atmostrankinginthirdplace. Remarkably,inallthreecompetitions,
+Evo-Φ69outcompetedallotherphages,withcumulativefoldchangesbetween16×and65×aftersixhours
+ofinfection. Incontrast, atthesametimepoint, ΦX174’scumulativefoldchangerangedfrom1.3×to4.0×
+fromitsinitialinfectioncount.
+Wenextexaminedtheinfectiondynamicsofeachphagebymeasuringhowquicklyandstronglyeachdrove
+thehostpopulationtoitsminimumdensity,focusingonthetiming,rate,anddepthoflysis(Figure5E;Figure
+S20). Wefoundthatonephage,Evo-Φ2483,exhibitedthefastestandstrongestlyticcapabilities. Onaverage,
+Evo-Φ2483 drove the host population to a minimum OD of 0.07, with a maximum growth rate decline
+600
+of –0.02 OD /min, reaching this minimum in 135 minutes; by comparison, ΦX174 infections resulted in
+600
+a higher minimum OD of 0.22, a slower maximum rate of decline of –0.01 OD /min, and 180 minutes
+600 600
+10
+
+--- Page 11 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure 5 | Generated bacteriophages exhibit high fitness. (A) Phage fitness competition assay workflow.
+(B–C)Inthreecompetitions,generatedphagesand ΦX174competedhead-to-headinE.coliCatequalmul-
+tiplicity of infection (MOI). We tracked cumulative fold change (log (FC)) of sequencing read counts over
+2
+six hours (B). Many generated phages matched or surpassed ΦX174’s performance at various time points
+(C), indicating a higher relative fitness. Growth curves of infected E. coli C populations show corresponding
+suppression of bacterial growth. Rectangular boxes, enlarged plots in (C); arrowheads, sequencing sample
+extraction time points. Dotted line, cumulative log (FC) of ΦX174. (D) Area under the curve (AUC) of the
+2
+cumulativelog (FC)ofphagereadcountsshowsthatgeneratedphagesoutcompeted ΦX174overthewhole
+2
+timecourse. Statisticalsignificancewasdeterminedbyone-wayANOVAwithTukeyHSD(*𝑝-adj<0.05). Bar
+height, mean; error bar, standard deviation; circles, 𝑛 = 3 competitions; dotted line, AUC of 0. (E) Growth
+dynamics of E. coli C infected with generated phages and ΦX174 individually show that several generated
+phages exhibit lower minimum population density after infection, steeper decline in host growth rate, and
+shorter time to minimum population density, together indicating stronger lytic capabilities. Statistical sig-
+nificance was determined by one-way ANOVA with Tukey HSD (*𝑝-adj < 0.05; **𝑝-adj < 0.01; ***𝑝-adj <
+0.001). Barheight,mean; errorbar,standarddeviation; circles, 𝑛=3infections; dottedline,meanvalueof
+ΦX174.
+11
+
+--- Page 12 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+to reach minimum density. Several other candidates—Evo-Φ111, Evo-Φ69, Evo-Φ108, and Evo-Φ108—also
+reached significantly lower host population densities than ΦX174. Notably, Evo-Φ2483 only ranked fifth in
+two of the three competition assays (Figure 5B), underscoring that lytic effect alone does not determine
+overallfitness. Asawhole,theseresultssupporttheabilityofgenomelanguagemodelstodesignhighfitness
+mutationsatthegenome-scale,yieldingdiversephenotypicoutcomesforphagelifecycleswhichcouldbenefit
+phage-basedbiotechnologies.
+2.6. Generatedbacteriophagesrapidlyovercomebacterialresistance
+Phagetherapyisemergingasapromisingalternativetoantibiotics,butitseffectivenesscanbelimitedbyrapid
+evolutionofresistantbacteria(Strathdeeetal.,2023). Wehypothesizedthatthediversephagesproducedby
+our genome design method could form a cocktail that more readily overcomes bacterial resistance (Figure
+6) (Kim et al., 2025; Pires et al., 2016; Pirnay, 2020). To investigate our hypothesis, we first evolved three
+ΦX174-resistant E. coli C cultures(Figure 6A; Figure S21A; Methods). Whole-genome sequencing ofthree
+isolatedstrainsfromeachresistantE.coliCculturerevealedthateachstrainindependentlydevelopednovel
+mutationswithinthewaaoperon(Figure6A;FigureS21B),whichisassociatedwithLPSsynthesis. Wecalled
+thesestrainsCR1,CR2,andCR3.Inparticular,strainCR1containedamissensemutation,L259W,inthewaaT
+gene;strainCR2containedasinglebasedeletionatnucleotideposition485ofwaaT,resultinginapremature
+stopcodonfollowedbypotentialreinitiationatadownstreamin-framestartcodon;andstrainCR3contained
+amissensemutation,A128D,inthewaaWgene. MutationsinwaaTandwaaWhavepreviouslybeenobserved
+to confer resistance against ΦX174 (Romeyer Dherbey et al., 2023), suggesting that strains CR1, CR2, and
+CR3likelyexhibitresistancethroughmodificationstoLPSsynthesis.
+Next, weexploredwhether ΦX174only, oramixtureofall16generatedphagesand ΦX174, couldover-
+come resistance in strains CR1, CR2, and CR3. We challenged three separate cultures: a ΦX174-susceptible
+strain, a ΦX174-resistant strain, and a mixture of the two strains to create a selective pressure for phages
+replicatinginsusceptiblecellstoevolvetheabilitytoinfectresistantcells(Figure 6B).Aftereachchallenge,
+wepassagedthesupernatantfromthemixedstrainsintofreshculturesandobservedtheirgrowthdynamics.
+Upon initial infection, the generated phage cocktail and ΦX174 successfully inhibited growth of the sus-
+ceptiblestrainsbutdidnotinhibitgrowthoftheresistantstrains(Figure6C).Strikingly,thegeneratedphage
+cocktail was able to successfully inhibit growth of strain CR1 after a single passage, CR2 after two passages,
+and CR3 after five passages. In contrast, ΦX174 alone could not inhibit growth of any resistant strains even
+afterallfivepassages.
+WeisolatedandsequencedseveralindividualphagesthatsuccessfullygrewonstrainsCR1andCR2,which
+revealed a single predominant phage genome responsible for overcoming each resistant strain (Methods),
+whichwedesignatedEvo-ΦR1andEvo-ΦR2,respectively. SequencealignmentrevealedthatallofEvo-ΦR1’s
+genomecouldbecollectivelycomposedfromfivesegmentsofEvo-Φ111andEvo-Φ114,withtheexceptionof
+two novel SNVs in the major capsid protein (Figure 6D). All of Evo-ΦR2’s genome could be composed from
+foursegmentsofEvo-Φ111,Evo-Φ114,andEvo-Φ2147,withtheexceptionofasinglenovelSNVinthemajor
+capsidprotein(Figure6E).Theabilitytoovercomeresistancelikelyarosefromrecombinationandacquired
+mutationeventsinvolvingtwoorthreeoftheEvo-generatedphages.
+GiventheresistantmutationsintheLPSgenesynthesisoperonsofstrainsCR1andCR2,wespeculatedthat
+key mutations in the predominant resistant phages likely decorated the outer surfaces of their major capsid
+andspikeproteins,sincetheseproteinsmodulateLPSbinding(Micheletal.,2010). Indeed,forbothEvo-ΦR1
+andEvo-ΦR2,weobserved15missensemutationsacrossthecapsidandspikeproteinsthatwerenotpresent
+inΦX174,14ofwhichweregeneratedbyEvo(Fig. 6D,E).Themajorityofthemutationsappearontheouter
+surfaceofthevirions,aspredictedbyAlphaFold3(Figure6F;FigureS21C,D)(Abramsonetal.,2024).These
+data show that evolutionary innovations generated by Evo likely contributed to resilience against bacterial
+resistanceand,morebroadly,suggesttheutilityofgenerativemodelsforproducinggeneticallydiversephage
+cocktailsthatcouldtranslateintoimprovedtherapeuticefficacy.
+12
+
+--- Page 13 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure6|Generatedbacteriophagesrapidlyovercomebacterialresistance.(A)Whole-genomesequencing
+ofthreeΦX174-resistantE.coliCstrainsrevealedmutationsinthewaaoperonabsentinsusceptibleE.coliC,
+whichfunctionsinlipopolysaccharidesynthesis.(B)Experimentalsetupforevolvingphagecounter-resistance
+byseriallypassagingcocktailsofgeneratedphagesand ΦX174,or ΦX174alone,onsusceptibleandresistant
+E. coli C. (C) Growth curves show that ΦX174 alone fails to overcome resistance, whereas generated phage
+cocktails suppress growth of all resistant cultures within five passages. Checkered flag, first passage with
+growthinhibition. (D–E)AlignmentsofgeneratedphagesagainstthepredominantresistantphagesEvo-ΦR1
+(D), Evo-ΦR2 (E) capable of infecting resistant strain 1 and 2, respectively, show that they are derived from
+generatedgenomes. Generatedphagesusedinthealignmentsarethosewiththelongestidenticalsequences
+(lightblue)withoutsinglenucleotidevariations(SNVs;darkblue)toeachresistantphagesuchthattheycol-
+lectivelyminimizethenumberofnovelmutations(yellow)observedintheresistantphage. Majorcapsidand
+spikeproteinsofeachresistantphagealignedtoΦX174majorcapsidandspikeproteinsarebelow,withsyn-
+onymous(blue)andnonsynonymousmutations(pink)relativeto ΦX174. (F)AlphaFold3(AF3)predictions
+of capsid (light blue) and spike (light gray) pentamers show that most capsid and spike mutations appear
+ontheexteriorofresistantphages. Nonsynonymousandnovelnonsynonymousmutationsrelativeto ΦX174
+arehighlightedinpinkandyellow, respectively. pLDDT,predictedlocaldistancedifferencetestscore; ipTM,
+interfacepredictedtemplatemodelingscore;pTM,predictedtemplatemodelingscore.
+13
+
+--- Page 14 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+3. Discussion
+In this work, we leveraged genome language models to achieve the first generative design of complete bac-
+teriophage genomes. We established a computational framework for specifying our design goals, including
+the development of a new gene annotation method and diverse scoring metrics, allowing us to controllably
+design toward a target genomic architecture and host tropism. In particular, our design template was based
+on ΦX174, a tractable, safe, and historically significant model genome (Barrell et al., 1976; Goulian et al.,
+1967; Kirchberger & Ochman, 2023; Sanger et al., 1977; Smith et al., 2003). We systematically evaluated
+thousands of computationally generated sequences and experimentally tested nearly 300 designs, resulting
+in 16 viable phages containing substantial evolutionary diversity and enabling a phage cocktail that rapidly
+overcamebacterialresistance. Multiplegeneratedphagesexhibitedincreasedfitnessorfasterlyticdynamics
+relativetoΦX174,demonstratingtheabilityofgenerativemodelstoefficientlyevolvehigh-fitnessgenomes.
+Synthetic genomics has historically relied on directed evolution, random mutagenesis, or rational engi-
+neering (Coradini et al., 2020; James et al., 2024). These approaches have been limited in the scope of
+their achieved evolutionary novelty due to the complexity of genome sequences and the limited throughput
+of methods for genome editing and synthesis. Rational engineering is further limited by incomplete human
+understanding of biology; for example, previous systematic efforts have struggled to increase features such
+as phage lysis rate or genome length (Aoyama & Hayashi, 1985; Endy et al., 2000; Russell & Müller, 1984).
+In contrast, our approachenabled designswith substantialnovelty inboth nucleotide andprotein sequence,
+including the genome of Evo-Φ63, that is 5% (268 bp) longer than ΦX174; Evo-Φ69, which outcompeted
+ΦX174 in competition assays; and Evo-Φ2483, which exhibited significantly faster lysis rates. Notably, the
+genomeEvo-Φ2147achievesalevelofnucleotidesequencenovelty(<95%ANI)onparwiththatachievedby
+naturalevolutionwhenproducingnewbacteriophagespecies(Turneretal.,2021).
+ThecapabilitytogeneratenovelgenomeswithAIsystemsalsoraisesimportantbiosafetyconsiderations.
+Inlinewithlongstandingprecedentforconductingbiologicalresearchwithinestablishedbiosafetylevels(Berg
+etal.,1975),weperformedallexperimentsatthebiosafetylevelappropriateforresearchwithbacteriophages
+andtheirnon-pathogenicbacterialhosts,alongsidesupplementaryprecautions(Methods). Theseestablished
+biosafety systems can be effectively adapted and applied to the generative design of new biological systems,
+especiallywhen,asinthiswork,designsareconstrainedbywell-characterizednaturalgenomesastemplates.
+Moreover, as we have previously demonstrated, the generative models themselves can possess inherent safe-
+guardsbasedontheirtrainingdata;forinstance,wehavepreviouslyshownthatdataexclusionssuccessfully
+preventtheEvo2modelsfromdesigningeukaryoticviruses,includingpathogenichumanviruses(Brixietal.,
+2025). Wehavealsoprovidedadditionaldetailsinasupplementary Biosafetyandbiocontainmentdiscus-
+sion. Bycontinuingtobuilduponrobustsafetyframeworks,thefieldcanresponsiblyunlockthepotentialof
+generativemodelstoaccessandengineercomplexbiologicalfunctionsforthebenefitofscienceandsociety.
+We envision that the further development of generative genomics for whole-genome design will require
+additional methodological innovations and improved training datasets. Future approaches could leverage
+techniques for improving and accelerating model conditioning beyond SFT alone (Hu et al., 2021; Lewis
+et al., 2020; Mnih et al., 2015; Widatalla et al., 2024). Continual genomic and metagenomic sequencing
+projectscouldalsocontributeadditionaltrainingdata.Designinglargerphageswillposeadditionalchallenges,
+particularly in cost-effective DNA synthesis and assembly. Techniques for multi-fragment genome assembly,
+combinatorialoligonucleotidepools,andinvitrotranscription–translationsystemsarepromisingavenuesfor
+realizingmorecomplexgenomedesign(Faberetal.,2019;Levrieretal.,2024;Pryoretal.,2022).
+Beyondbiotechnologicalortherapeuticutility,generativedesignofwholegenomesoffersuniqueopportu-
+nitiesforstudyingevolution(ShaerTamar&Kishony,2022).Bysystematicallysamplingfromlearnedgenomic
+distributions,itispossibletoexplorelargemutationallandscapesandinvestigatethegeneticbasisofproperties
+suchashosttropism. Indeed,weobservedsubsequentrecombinationandmutationofourgeneratedphages
+thatlikelyconferredresilienceagainsthostresistance. Theabilitytorapidlydesignphagegenomestunedfor
+hostrange,fitness,andresistanceevasionmayexpandbiotechnologicaltoolkitsandtransformphagetherapy
+pipelines, enabling more adaptive and resilient antimicrobial strategies (Kim et al., 2025; Mutalik & Arkin,
+2022;Pirnay,2020;Wimmeretal.,2009).
+In total, our results demonstrate that generative AI can capture an underlying evolutionary design space
+withenoughfidelitytoproducenovelfunctionalbacteriophagegenomes. Continuedprogresswilllikelybring
+14
+
+--- Page 15 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+about more generalizable models capable of designing across diverse biological systems with desirable func-
+tionalproperties. Therapidpaceofimprovementingenerativebiologysuggestsafuturewheregenomedesign
+could become a core biotechnology alongside genome sequencing, synthesis, and editing, possibly enabling
+thegenerationofcompletelivingorganisms.
+15
+
+--- Page 16 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+4. Acknowledgements
+WethankBrandonAmeglio,PaulBollyky,AshirBorah,CollinChiu,SeyoneChithrananda,DrewEndy,Simone
+Evans,PatrickHsu,SantiagoMille-Fragoso,BrianPlosky,JessicaSacher,andSebastiánSomolinosforhelpful
+discussions and support with the manuscript. We thank Jerome Ku and Jeremy Sullivan for assistance with
+computational infrastructure. We thank Twist Bioscience for support with DNA synthesis. We thank Arc
+Institute LabOps for assistance with experimental setups. We thank Ashir Borah, Collin Chiu, Joseph Noh,
+Alex Gao’s lab, Patrick Hsu’s lab, and Lingyin Li’s lab for generous sharing of materials and reagents. We
+thank Joseph Noh, Haoqing Wang, and the Stanford University Cryo-Electron Microscopy Center (cEMc) for
+assistancewithcryo-EM.
+S.H.K., A.T.M., and G.B. acknowledge funding support from the National Science Foundation Graduate
+ResearchFellowshipProgram. D.B.L.acknowledgesfundingsupportfromtheFannieandJohnHertzFounda-
+tion. A.T.M.acknowledgesfundingsupportfromtheKnight-HennessyGraduateScholarshipFund. B.L.H.ac-
+knowledgesfundingsupportfromArcInstitute,theGatesFoundation,StanfordInstituteforHuman-Centered
+ArtificialIntelligence(HAI)Hoffman-YeeResearchGrants,V.Gupta,andR.Tonsing.
+5. Author contributions
+S.H.K.andB.L.H.conceivedanddesignedthestudy. B.L.H.supervisedtheproject. S.H.K.andB.L.H.collected
+thetrainingdata. S.H.K.,G.B.,andB.L.Hfine-tunedthemodels. S.H.K.andD.G.performedthephagegenome
+generation and evaluation. S.H.K., C.L.D., and D.G. performed the phage genome assembly transformation
+assays. S.H.K. and C.L.D. performed the phage sequencing, propagation, titering, and host tropism assay.
+S.H.K. and A.T.M. performed the phylogenetic analysis. S.H.K., C.L.D., and D.B.L. performed the cryo-EM
+experiments. D.B.L. processed the cryo-EM data. S.H.K., D.B.L., and M.E.W. analyzed the cryo-EM data.
+S.H.K.andA.T.M.performedthephagecompetitionandbacterialresistanceassays. S.H.K.andB.L.H.wrote
+theinitialdraftofthemanuscript. Allauthorscontributedtowritingthefinalversionofthemanuscript.
+6. Competing interests
+B.L.H.acknowledgesoutsideinterestinArpelosBiosciencesandGenyroasascientificco-founder. S.H.K.and
+B.L.H. are named on a provisional patent application applied for by Stanford University and Arc Institute
+relatedtothismanuscript. Allotherauthorsdeclarenocompetinginterests.
+7. Data and code availability
+The raw and processed Microviridae datasets used for supervised fine-tuning are available for download at
+https://doi.org/10.5281/zenodo.17101843 Code for generation and fine-tuning with Evo 1 is available
+at https://github.com/evo-design/evo/. Code for generation and fine-tuning with Evo 2 is available at
+https://github.com/arcinstitute/evo2. Code for phage genome design and analysis are available at both
+repositories. The fine-tuned Microviridae model for Evo 1 is available at https://huggingface.co/evo-des
+ign/evo-1-7b-131k-microviridae, and the fine-tuned Microviridae model for Evo 2 is available at https:
+//huggingface.co/evo-design/evo-2-7b-8k-microviridae. Thecryo-EMdensitymapsandresultingmodelsfor
+ΦX174 and Evo-Φ36 have been deposited in the Electron Microscopy Data Bank (EMDB) with EMDB codes
+XXXXandXXXX,andtheProteinDataBank(PDB)withPDBcodesXXXXandXXXX,respectively.
+16
+
+--- Page 17 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+References
+Abramson, J., Adler, J., Dunger, J., Evans, R., Green, T., Pritzel, A., & Jumper, J. (2024). Accurate structure
+predictionofbiomolecularinteractionswithAlphaFold3.Nature,630(8016),493–500.
+Aoyama,A.,&Hayashi,M.(1985).Effectsofgenomesizeonbacteriophage ΦX174DNApackaginginvitro.
+JournalofBiologicalChemistry,260(20),11033–11038.
+Archer, C., Kim, J., Jeong, H., Park, J., Vickers, C., Lee, S., & Nielsen, L. (2011). The genome sequence of E.
+coliW(ATCC9637):comparativegenomeanalysisandanimprovedgenome-scalereconstructionof
+E.coli.BMCGenomics,12(1),9.
+Barrell,B.,Air,G.,&Hutchison,C.(1976).OverlappinggenesinbacteriophageΦX174.Nature,264(5581).
+Berg,P.,Baltimore,D.,Brenner,S.,RoblinIII,R.O.,&Singer,M.F.(1975).Asilomarconferenceonrecombi-
+nantDNAmolecules.Science,188(4192),991–994.
+Bernal, R., Hafenstein, S., Esmeralda, R., Fane, B., & Rossmann, M. (2004). The ΦX174 protein J mediates
+DNApackagingandviralattachmenttohostcells.JournalofMolecularBiology,337(5),1109–1122.
+Besemer,J.,&Borodovsky,M.(2005).GeneMark:websoftwareforgenefindinginprokaryotes,eukaryotes
+andviruses.NucleicAcidsResearch,33(suppl 2),451–454.
+Brister,J.,Ako-Adjei,D.,Bao,Y.,&Blinkova,O.(2015).NCBIviralgenomesresource.NucleicAcidsResearch,
+43(D1),571–577.
+Brixi, G., Durrant, M., Ku, J., Poli, M., Brockman, G., Chang, D., & Hie, B. (2025). Genome modeling and
+designacrossalldomainsoflifewithEvo2.bioRxiv.
+Camacho,C.,Coulouris,G.,Avagyan,V.,Ma,N.,Papadopoulos,J.,Bealer,K.,&Madden,T.(2009).BLAST+:
+architectureandapplications.BMCBioinformatics,10(1),421.
+Camargo,A.,Roux,S.,Schulz,F.,Babinski,M.,Xu,Y.,Hu,B.,&Kyrpides,N.(2023).Identificationofmobile
+geneticelementswithgeNomad.NatureBiotechnology,1–10.
+Chang,T.,&Bergen,B.(2024).Languagemodelbehavior:Acomprehensivesurvey.ComputationalLinguistics,
+50(1),293–350.
+Coradini,A.,Hull,C.,&Ehrenreich,I.(2020).Buildinggenomestounderstandbiology.NatureCommunica-
+tions,11(1),6177.
+Costanzo, M., VanderSluis, B., Koch, E., Baryshnikova, A., Pons, C., Tan, G., & Boone, C. (2016). A global
+geneticinteractionnetworkmapsawiringdiagramofcellularfunction.Science,353(6306),1420.
+Croll, T. (2018). ISOLDE: a physically realistic environment for model building into low-resolution electron-
+densitymaps.BiologicalCrystallography,74(6),519–530.
+Crooks, G., Hon, G., Chandonia, J., & Brenner, S. (2004). WebLogo: a sequence logo generator. Genome Re-
+search,14(6),1188–1190.
+Dauparas, J., Anishchenko, I., Bennett, N., Bai, H., Ragotte, R., Milles, L., & Baker, D. (2022). Robust deep
+learning–basedproteinsequencedesignusingProteinMPNN.Science,378(6615),49–56.
+Dedrick,R.,Guerrero-Bustamante,C.,Garlena,R.,Russell,D.,Ford,K.,Harris,K.,&Spencer,H.(2019).En-
+gineeredbacteriophagesfortreatmentofapatientwithadisseminateddrug-resistantMycobacterium
+abscessus.NatureMedicine,25(5),730–733.
+Delcher,A.,Bratke,K.,Powers,E.,&Salzberg,S.(2007).IdentifyingbacterialgenesandendosymbiontDNA
+withGlimmer.Bioinformatics,23(6),673–679.
+Durrant,M.,Perry,N.,Pai,J.,Jangid,A.,Athukoralage,J.,Hiraizumi,M.,&Hsu,P.(2024).BridgeRNAsdirect
+programmablerecombinationoftargetanddonorDNA.Nature,630(8018),984–993.
+Edgar, R., Taylor, B., Lin, V., Altman, T., Barbera, P., Meleshko, D., & Babaian, A. (2022). Petabase-scale
+sequencealignmentcatalysesviraldiscovery.Nature,602(7895),142–147.
+Egorov,A.,&Atkinson,G.(2025).LoVis4u:alocusvisualizationtoolforcomparativegenomicsandcoverage
+profiles.NARGenomicsandBioinformatics,7(1),009.
+Elena,S.,&Lenski,R.(1997).Testofsynergisticinteractionsamongdeleteriousmutationsinbacteria.Nature,
+390(6658),395–398.
+Emsley,P.,&Cowtan,K.(2004).Coot:model-buildingtoolsformoleculargraphics.BiologicalCrystallography,
+60(12),2126–2132.
+Endy,D.,You,L.,Yin,J.,&Molineux,I.(2000).Computation,prediction,andexperimentaltestsoffitnessfor
+bacteriophage T7 mutants with permuted genomes. Proceedings of the National Academy of Sciences,
+97(10),5375–5380.
+17
+
+--- Page 18 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Faber,M.,Leuven,V.,T.,J.,Ederer,M.,Sapozhnikov,Y.,Wilson,Z.,Wichman,H.,&Miller,C.(2019).Satura-
+tion mutagenesis genome engineering of infective Φx174 bacteriophage via unamplified oligo pools
+andgoldengateassembly.ACSSyntheticBiology,9(1),125–131.
+Fane, B., Head, S., & Hayashi, M. (1992). Functional relationship between the J proteins of bacteriophages
+phiX174andG4duringphagemorphogenesis.JournalofBacteriology,174(8),2717–2719.
+Fiers, W., & Sinsheimer, R. (1962). The structure of the DNA of bacteriophage ΦX174: III. Ultracentrifugal
+evidenceforaringstructure.JournalofMolecularBiology,5(4),424–434.
+Fredens,J.,Wang,K.,Torre,D.,Funke,L.,Robertson,W.,Christova,Y.,&Chin,J.(2019).Totalsynthesisof
+Escherichiacoliwitharecodedgenome.Nature,569(7757),514–518.
+Gibson,D.,Benders,G.,Andrews-Pfannkoch,C.,Denisova,E.,Baden-Tillson,H.,Zaveri,J.,&Smith,H.(2008).
+Complete chemical synthesis, assembly, and cloning of a Mycoplasma genitalium genome. Science,
+319(5867),1215–1220.
+Godson,G.,Barrell,B.,Staden,R.,&Fiddes,J.(1978).NucleotidesequenceofbacteriophageG4DNA.Nature,
+276(5685),236–247.
+Goulian,M.,Kornberg,A.,&Sinsheimer,R.(1967).EnzymaticsynthesisofDNA,XXIV.Synthesisofinfectious
+phageΦX174DNA.ProceedingsoftheNationalAcademyofSciences,58(6),2321–2328.
+Harris, C., Millman, K., Walt, S., Gommers, R., Virtanen, P., Cournapeau, D., & Oliphant, T. (2020). Array
+programmingwithNumPy.Nature,585(7825),357–362.
+Hayes,T.,Rao,R.,Akin,H.,Sofroniew,N.,Oktay,D.,Lin,Z.,&Rives,A.(2025).Simulating500millionyears
+ofevolutionwithalanguagemodel.Science,387(6736),850–858.
+Hie, B., Shanker, V., Xu, D., Bruun, T., Weidenbacher, P., Tang, S., & Kim, P. (2024). Efficient evolution of
+humanantibodiesfromgeneralproteinlanguagemodels.NatureBiotechnology,42(2),275–283.
+Hu,E.,Shen,Y.,Wallis,P.,Allen-Zhu,Z.,Li,Y.,Wang,S.,&Chen,W.(2021).LoRA:Low-rankadaptationof
+largelanguagemodels[arXivpreprintarXiv:2106.09685.].
+Hutchison, C., III, Chuang, R., Noskov, V., Assad-Garcia, N., Deerinck, T., Ellisman, M., & Venter, J. (2016).
+Designandsynthesisofaminimalbacterialgenome.Science,351(6280),6253.
+Hutchison, C., III, Peterson, S., Gill, S., Cline, R., White, O., Fraser, C., & Craig Venter, J. (1999). Global
+transposonmutagenesisandaminimalMycoplasmagenome.Science,286(5447),2165–2169.
+Hyatt, D., Chen, G., LoCascio, P., Land, M., Larimer, F., & Hauser, L. (2010). Prodigal: prokaryotic gene
+recognitionandtranslationinitiationsiteidentification.BMCBioinformatics,11,1–11.
+Ingraham,J.,Baranov,M.,Costello,Z.,Barber,K.,Wang,W.,Ismail,A.,&Grigoryan,G.(2023).Illuminating
+proteinspacewithaprogrammablegenerativemodel.Nature,623(7989),1070–1078.
+Jacob,F.,&Monod,J.(1961).Geneticregulatorymechanismsinthesynthesisofproteins.JournalofMolecular
+Biology,3(3),318–356.
+James,J.,Dai,J.,Chew,W.,&Cai,Y.(2024).Thedesignandengineeringofsyntheticgenomes.NatureReviews
+Genetics,1–22.
+Jaschke,P.,Dotson,G.,Hung,K.,Liu,D.,&Endy,D.(2019).Definitivedemonstrationbysynthesisofgenome
+annotationcompleteness.ProceedingsoftheNationalAcademyofSciences,116(48),24206–24213.
+Jaschke,P.,Lieberman,E.,Rodriguez,J.,Sierra,A.,&Endy,D.(2012).Afullydecompressedsyntheticbacte-
+riophageΦX174genomeassembledandarchivedinyeast.Virology,434(2),278–284.
+Jiang,K.,Yan,Z.,Bernardo,M.,Sgrizzi,S.,Villiger,L.,Kayabolen,A.,&Abudayyeh,O.(2024).Rapidinsilico
+directedevolutionbyaproteinlanguagemodelwithEVOLVEpro.Science,387(6732),6006.
+Kaplan, J., McCandlish, S., Henighan, T., Brown, T., Chess, B., Child, R., & Amodei, D. (2020). Scaling laws
+forneurallanguagemodels[arXivpreprintarXiv:2001.08361.].
+Karcagi,I.,Draskovits,G.,Umenhoffer,K.,Fekete,G.,Kovács,K.,Méhi,O.,&Papp,B.(2016).Indispensability
+ofhorizontallytransferredgenesanditsimpactonbacterialgenomestreamlining.MolecularBiology
+andEvolution,33(5),1257–1269.
+Katoh, K., & Standley, D. (2013). MAFFT multiple sequence alignment software version 7: improvements in
+performanceandusability.MolecularBiologyandEvolution,30(4),772–780.
+Kilcher, S., & Loessner, M. (2019). Engineering bacteriophages as versatile biologics. Trends in Microbiology,
+27(4),355–367.
+Kim,M.,Suh,G.,Cullen,G.,Rodriguez,S.,Dharmaraj,T.,Chang,T.,&Sacher,J.(2025).Bacteriophagether-
+apyformultidrug-resistantinfections:currenttechnologiesandtherapeuticapproaches.TheJournal
+ofClinicalInvestigation,135(5).
+Kimanius,D.,Dong,L.,Sharov,G.,Nakane,T.,&Scheres,S.(2021).Newtoolsforautomatedcryo-EMsingle-
+particleanalysisinRELION-4.0.BiochemicalJournal,478(24),4169–4185.
+18
+
+--- Page 19 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Kirchberger, P., & Ochman, H. (2023). Microviruses: A World Beyond phiX174. Annual Review of Virology,
+10(1),99–118.
+Kunzmann, P., & Hamacher, K. (2018). Biotite: a unifying open source computational biology framework in
+Python.BMCBioinformatics,19,1–8.
+Leuven,J.,Ederer,M.,Burleigh,K.,Scott,L.,Hughes,R.,Codrea,V.,&Miller,C.(2021).ΦX174attenuation
+bywhole-genomecodondeoptimization.GenomeBiologyandEvolution,13(2),214.
+Levrier, A., Karpathakis, I., Nash, B., Bowden, S., Lindner, A., & Noireaux, V. (2024). PHEIGES: all-cell-free
+phagesynthesisandselectionfromengineeredgenomes.NatureCommunications,15(1),2223.
+Lewis,P.,Perez,E.,Piktus,A.,Petroni,F.,Karpukhin,V.,Goyal,N.,&Kiela,D.(2020).Retrieval-augmented
+generationforknowledge-intensivenlptasks.AdvancesinNeuralInformationProcessingSystems,33,
+9459–9474.
+Liebschner, D., Afonine, P., Baker, M., Bunkóczi, G., Chen, V., Croll, T., & Adams, P. (2019). Macromolec-
+ular structure determination using X-rays, neutrons and electrons: recent developments in Phenix.
+BiologicalCrystallography,75(10),861–877.
+Lin,Z.,Akin,H.,Rao,R.,Hie,B.,Zhu,Z.,Lu,W.,&Rives,A.(2023).Evolutionary-scalepredictionofatomic-
+levelproteinstructurewithalanguagemodel.Science,379(6637),1123–1130.
+Logel, D., & Jaschke, P. (2020). A high-resolution map of bacteriophage ΦX174 transcription. Virology, 547,
+47–56.
+Mandell,D.,Lajoie,M.,Mee,M.,Takeuchi,R.,Kuznetsov,G.,Norville,J.,&Church,G.(2015).Biocontainment
+ofgeneticallymodifiedorganismsbysyntheticproteindesign.Nature,518(7537),55–60.
+McGuffie,M.,&Barrick,J.(2021).pLannotate:engineeredplasmidannotation.NucleicAcidsResearch,49(W1),
+516–522.
+McKenna, R., Xia, D., Willingmann, P., IIag, L., Krishnaswamy, S., Rossmann, M., & Incardona, N. (1992).
+Atomicstructureofsingle-strandedDNAbacteriophageΦX174anditsfunctionalimplications.Nature,
+355(6356),137–143.
+McNair,K.,Zhou,C.,Dinsdale,E.,Souza,B.,&Edwards,R.(2019).PHANOTATE:anovelapproachtogene
+identificationinphagegenomes.Bioinformatics,35(22),4537–4542.
+Merchant, A., King, S., Nguyen, E., & Hie, B. (2024). Semantic mining of functional de novo genes from a
+genomiclanguagemodel.
+Michel,A.,Clermont,O.,Denamur,E.,&Tenaillon,O.(2010).BacteriophagePhiX174’secologicalnicheand
+the flexibility of its Escherichia coli lipopolysaccharide receptor. Applied and Environmental Microbi-
+ology,76(21),7310–7313.
+Mnih,V.,Kavukcuoglu,K.,Silver,D.,Rusu,A.,Veness,J.,Bellemare,M.,&Hassabis,D.(2015).Human-level
+controlthroughdeepreinforcementlearning.Nature,518(7540),529–533.
+Mutalik,V.,&Arkin,A.(2022).Aphagefoundryframeworktosystematicallydevelopviralcountermeasures
+tocombatantibiotic-resistantbacterialpathogens.iScience,25(4).
+Nayfach, S., Camargo, A., Schulz, F., Eloe-Fadrosh, E., Roux, S., & Kyrpides, N. (2021). CheckV assesses the
+qualityandcompletenessofmetagenome-assembledviralgenomes.NatureBiotechnology,39(5),578–
+585.
+Nguyen, E., Poli, M., Durrant, M., Kang, B., Katrekar, D., Li, D., & Hie, B. (2024). Sequence modeling and
+designfrommoleculartogenomescalewithEvo.Science,386(6723),9336.
+Nguyen,E.,Poli,M.,Faizi,M.,Thomas,A.,Wornow,M.,Birch-Sykes,C.,&Baccus,S.(2024).Hyenadna:Long-
+range genomic sequence modeling at single nucleotide resolution. Advances in Neural Information
+ProcessingSystems,36.
+Nyerges,A.,Vinke,S.,Flynn,R.,Owen,S.,Rand,E.,Budnik,B.,&Church,G.(2023).Aswappedgeneticcode
+preventsviralinfectionsandgenetransfer.Nature,615(7953),720–727.
+Ogunbunmi, E., Roznowski, A., & Fane, B. (2021). The effects of packaged, but misguided, single-stranded
+DNAgenomesaretransmittedtotheoutersurfaceofthe ΦX174capsid.JournalofVirology,95(18),
+10–1128.
+O’Leary, N., Cox, E., Holmes, J., Anderson, W., Falk, R., Hem, V., & Schneider, V. (2024). Exploring and
+retrieving sequence and metadata for species across the tree of life with NCBI Datasets. Scientific
+Data,11(1),732.
+Peet,R.(1974).Themeasurementofspeciesdiversity.AnnualReviewofEcologyandSystematics,285–307.
+Pettersen, E., Goddard, T., Huang, C., Meng, E., Couch, G., Croll, T., & Ferrin, T. (2021). UCSF ChimeraX:
+Structurevisualizationforresearchers,educators,anddevelopers.ProteinScience,30(1),70–82.
+19
+
+--- Page 20 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Pires, D., Cleto, S., Sillankorva, S., Azeredo, J., & Lu, T. (2016). Genetically engineered phages: a review of
+advancesoverthelastdecade.MicrobiologyandMolecularBiologyReviews,80(3),523–543.
+Pirnay,J.(2020).Phagetherapyintheyear2035.FrontiersinMicrobiology,11,1171.
+Pryor,J.,Potapov,V.,Bilotti,K.,Pokhrel,N.,&Lohman,G.(2022).Rapid40kbgenomeconstructionfrom52
+partsthroughdata-optimizedassemblydesign.ACSSyntheticBiology,11(6),2036–2042.
+Punjani, A., Rubinstein, J., Fleet, D., & Brubaker, M. (2017). cryoSPARC: algorithms for rapid unsupervised
+cryo-EMstructuredetermination.NatureMethods,14(3),290–296.
+Quinones-Olvera,N.(n.d.).Bacteriophagegenomesizes.https://github.com/nataquinones/phage_genome_
+size/
+Richardson, S., Mitchell, L., Stracquadanio, G., Yang, K., Dymond, J., DiCarlo, J., & Bader, J. (2017). Design
+ofasyntheticyeastgenome.Science,355(6329),1040–1044.
+Romeyer Dherbey, J., Parab, L., Gallie, J., & Bertels, F. (2023). Stepwise evolution of E. coli C and ΦX174
+revealsunexpectedlipopolysaccharide(LPS)diversity.MolecularBiologyandEvolution,40(7),154.
+Rosenthal, P., & Henderson, R. (2003). Optimal determination of particle orientation, absolute hand, and
+contrast loss in single-particle electron cryomicroscopy. Journal of Molecular Biology, 333(4), 721–
+745.
+Roznowski, A., Doore, S., Kemp, S., & Fane, B. (2020). Finally, a role befitting Astar: strongly conserved,
+unessentialmicrovirusA*proteinsensuretheproductfidelityofpackagingreactions.JournalofVirol-
+ogy,94(2),10–1128.
+Russell,P.,&Müller,U.(1984).ConstructionofbacteriophageΦX174mutantswithmaximumgenomesizes.
+JournalofVirology,52(3),822–827.
+Sanger,F.,Air,G.,Barrell,B.,Brown,N.,Coulson,A.,Fiddes,J.,&Smith,M.(1977).Nucleotidesequenceof
+bacteriophageΦX174DNA.Nature,265(5596),687–695.
+Sanjuán,R.,Moya,A.,&Elena,S.(2004).Thedistributionoffitnesseffectscausedbysingle-nucleotidesub-
+stitutionsinanRNAvirus.ProceedingsoftheNationalAcademyofSciences,101(22),8396–8401.
+Schwengers,O.,Jelonek,L.,Dieckmann,M.,Beyvers,S.,Blom,J.,&Goesmann,A.(2021).Bakta:rapidand
+standardized annotation of bacterial genomes via alignment-free sequence identification. Microbial
+Genomics,7(11),000685.
+Seabold,S.,&Perktold,J.(2010).Statsmodels:econometricandstatisticalmodelingwithpython.SciPy,7(1),
+92–96.
+ShaerTamar,E.,&Kishony,R.(2022).Multistepdiversificationinspatiotemporalbacterial-phagecoevolution.
+NatureCommunications,13(1),7971.
+Shlomai,J.,&Kornberg,A.(1980).AnEscherichiacolireplicationproteinthatrecognizesauniquesequence
+withinahairpinregioninphiX174DNA.ProceedingsoftheNationalAcademyofSciences,77(2),799–
+803.
+Singh, U., & Wurtele, E. (2021). orfipy: a fast and flexible tool for extracting ORFs. Bioinformatics, 37(18),
+3019–3020.
+Smith, H. O., Hutchison III, C. A., Pfannkoch, C., & Venter, J. C. (2003). Generating a synthetic genome by
+whole genome assembly: ΦX174 bacteriophage from synthetic oligonucleotides. Proceedings of the
+NationalAcademyofSciences,100(26),15440–15445.
+Srinivasan,P.,&Smolke,C.(2020).Biosynthesisofmedicinaltropanealkaloidsinyeast.Nature,585(7826),
+614–619.
+Steinegger,M.,&Söding,J.(2017).MMseqs2enablessensitiveproteinsequencesearchingfortheanalysisof
+massivedatasets.NatureBiotechnology,35(11),1026–1028.
+Strathdee,S.,Hatfull,G.,Mutalik,V.,&Schooley,R.(2023).Phagetherapy:Frombiologicalmechanismsto
+futuredirections.Cell,186(1),17–31.
+Sun, Y., Roznowski, A., Tokuda, J., Klose, T., Mauney, A., Pollack, L., & Rossmann, M. (2017). Structural
+changesoftaillessbacteriophage ΦX174duringpenetrationofbacterialcellwalls.Proceedingsofthe
+NationalAcademyofSciences,114(52),13708–13713.
+Terzian,P.,OloNdela,E.,Galiez,C.,Lossouarn,J.,PérezBucio,R.,Mom,R.,&Enault,F.(2021).PHROG:fam-
+iliesofprokaryoticvirusproteinsclusteredusingremotehomology.NARGenomicsandBioinformatics,
+3(3),067.
+Turner,D.,Kropinski,A.,&Adriaenssens,E.(2021).Aroadmapforgenome-basedphagetaxonomy.Viruses,
+13(3),506.
+Vaswani,A.,Shazeer,N.,Parmar,N.,Uszkoreit,J.,Jones,L.,Gomez,A.,&Polosukhin,I.(2017).Attentionis
+allyouneed.AdvancesinNeuralInformationProcessingSystems,30.
+20
+
+--- Page 21 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Virshup, I., Rybakov, S., Theis, F., Angerer, P., & Wolf, F. (2021). anndata: Annotated data. Journal of Open
+SourceSoftware,9(101),4371.
+Wang, K., Torre, D., Robertson, W., & Chin, J. (2019). Programmed chromosome fission and fusion enable
+preciselarge-scalegenomerearrangementandassembly.Science,365(6456),922–926.
+Wang,R.,Yang,S.,Liu,Z.,Zhang,Y.,Wang,X.,Xu,Z.,&Li,S.(2024).PhageScope:awell-annotatedbacte-
+riophage database with automatic analyses and visualizations. Nucleic Acids Research, 52(D1), 756–
+761.
+Wickner, S., & Hurwitz, J. (1974). Conversion of ΦX174 viral DNA to double-stranded form by purified Es-
+cherichiacoliproteins.ProceedingsoftheNationalAcademyofSciences,71(10),4120–4124.
+Widatalla,T.,Rafailov,R.,&Hie,B.(2024).Aligningproteingenerativemodelswithexperimentalfitnessvia
+directpreferenceoptimization.bioRxiv.
+Wimmer, E., Mueller, S., Tumpey, T., & Taubenberger, J. (2009). Synthetic viruses: a new opportunity to
+understandandpreventviraldisease.NatureBiotechnology,27(12),1163–1172.
+Wolf,F.,Angerer,P.,&Theis,F.(2018).SCANPY:large-scalesingle-cellgeneexpressiondataanalysis.Genome
+Biology,19(1),15.
+Wright,B.,Molloy,M.,&Jaschke,P.(2022).Overlappinggenesinnaturalandengineeredgenomes.Nature
+ReviewsGenetics,23(3),154–168.
+21
+
+--- Page 22 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Generative design of novel bacteriophages
+with genome language models
+Supplementary material
+A Biosafetyandbiocontainmentdiscussion 24
+B Methods 25
+B.1 Generativemodelingofbacteriophagegenomes . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+B.1.1 GeneratingsequenceswithEvo . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+B.1.2 Generatingsequenceswithbacteriophagerealmprompts . . . . . . . . . . . . . . . . . 25
+B.1.3 Generatedbacteriophagerealmsequenceanalyses . . . . . . . . . . . . . . . . . . . . 25
+B.1.4 Microviridaedata . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+B.1.5 Datapreprocessingforsupervisedfine-tuning . . . . . . . . . . . . . . . . . . . . . . . 26
+B.1.6 Supervisedfine-tuningofEvo1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26
+B.1.7 Supervisedfine-tuningofEvo2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26
+B.1.8 Positionalentropyanalysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26
+B.1.9 Designconstraints . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26
+B.1.10 ORFcallingandgeneannotation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27
+B.1.11 Geneticarchitecturesimilarityscoring . . . . . . . . . . . . . . . . . . . . . . . . . . . 27
+B.1.12 UMAPvisualizationofgeneticarchitectures . . . . . . . . . . . . . . . . . . . . . . . . 27
+B.1.13 ΦX174genomepromptanalysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+B.1.14 Modeltemperatureandpromptsamplingsweeps . . . . . . . . . . . . . . . . . . . . . 28
+B.1.15 Shannondiversityanalysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+B.1.16 Sequencefilteringretentionrateanalysis . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+B.2 Functionalassaysofbacteriophagegenomes . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+B.2.1 Biosafetyandsteriletechnique . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+B.2.2 Bacterialandbacteriophagegrowthmedia . . . . . . . . . . . . . . . . . . . . . . . . . 29
+B.2.3 Bacterialstrains. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29
+B.2.4 BacteriophagegenomeassemblyfromΦX174RFIDNA . . . . . . . . . . . . . . . . . . 29
+B.2.5 BacteriophagegenomeassemblyfromsynthesizedDNA. . . . . . . . . . . . . . . . . . 29
+B.2.6 Bacteriophagegenomeassemblyplaqueassay . . . . . . . . . . . . . . . . . . . . . . . 30
+B.2.7 Bacteriophagegenomeassemblygrowthassay . . . . . . . . . . . . . . . . . . . . . . . 30
+B.2.8 Bacteriophageglycerolstocks . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+B.2.9 Long-readsequencingofbacteriophagegenomesfromglycerolstocks . . . . . . . . . . 30
+B.2.10 Bacteriophagepropagationandharvesting . . . . . . . . . . . . . . . . . . . . . . . . . 30
+B.2.11 Bacteriophagetitering . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+22
+
+--- Page 23 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+B.2.12 Hosttropismassay . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+B.3 Phylogeneticanalysisofbacteriophages . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+B.3.1 Naturalreferencegenomes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+B.3.2 Syntenyanalysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+B.3.3 Whole-genomealignment . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+B.3.4 Mutationalcounttonearestnaturalgenomeanalysis . . . . . . . . . . . . . . . . . . . 32
+B.3.5 Cumulativegenomeattributionanalysis . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+B.3.6 Phylogenetictreeconstruction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+B.3.7 Mutationalhotspotanalysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+B.4 Structuralanalysisofbacteriophages . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+B.4.1 Proteinstructureprediction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+B.4.2 Bacteriophagepurificationforcryo-EM . . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+B.4.3 Polyacrylamidegelelectrophoresis(PAGE) . . . . . . . . . . . . . . . . . . . . . . . . . 33
+B.4.4 Gridpreparationforcryo-EM . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33
+B.4.5 Cryo-EMdataacquisition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33
+B.4.6 Cryo-EMdataprocessing. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33
+B.4.7 Cryo-EMmodelbuilding . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+B.5 Fitnessassaysofbacteriophagegenomes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+B.5.1 Bacteriophagecompetitionassay . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+B.5.2 Bacteriophagecompetitionsequencinganalysis . . . . . . . . . . . . . . . . . . . . . . 34
+B.5.3 Bacterialgrowthrateassay . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+B.5.4 Bacterialgrowthratedetermination . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35
+B.5.5 Statisticalanalysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35
+B.5.6 Bacteriophageresistanceassay . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35
+B.5.7 Bacteriophagecocktailsequencing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36
+B.5.8 Whole-genomesequencinganalysisofΦX174-resistantE.colistrains . . . . . . . . . . 36
+C Supplementaryfiguresandtables 37
+D Supplementaryfiles 61
+D.1 FileS1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 61
+23
+
+--- Page 24 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+A. Biosafety and biocontainment discussion
+Thegenerativedesignofentiregenomesrepresentsamilestoneinourabilitytoengineerbiologicalsystems,
+promising new biotechnologies and therapeutics. However, this powerful capability advance necessitates
+a thoughtful consideration of biosafety to ensure responsible development. In this study, our approach to
+biosafetyandbiocontainmentleveragedcomputationalsafeguardsinherenttoourmodels, experimentalde-
+signchoices,andestablishedlaboratorycontainmentprotocols.
+Aprimarylayerofsafetyisbuiltdirectlyintothegenomelanguagemodelsthemselves,asthegenerative
+capabilities of these models are fundamentally shaped by their training data. In this and previous work, we
+havedeliberatelywithheldallviruseswitheukaryotichosts,includingthosepathogenictohumans,fromthe
+models’trainingdata. Aswehavedemonstratedpreviously,thisdataexclusionstrategysuccessfullyprevents
+Evo2frompredictionanddesigntasksrelatedtohumanviruses(Brixietal.,2025).
+For this study, we further specialized the models by fine-tuning them exclusively on a curated dataset
+of Microviridae genomes, a family composed entirely of bacteriophages. This targeted training means the
+model retains its poor performance on eukaryotic viruses while enhancing its ability to generate sequences
+withinourspecificphagedesignspace. Wehavealsoshownthatbothpretrainingandfine-tuningwerenec-
+essaryforcoherentgenerationofcomplexsystemssuchasCRISPR-Casoperons(Nguyen,Poli,Durrant,etal.,
+2024). Because Evo 1 and Evo 2 were not pretrained on eukaryotic viral genomes, enabling the generation
+of such viruses would require a substantially greater investment in terms of data, computational resources,
+andmethodologicaldevelopment. Whiletraininggenomelanguagemodelsonsequencesfromhumanviruses
+couldhavesubstantialutility,suchasinpredictingaspectsofviralevolutionordesigningviralvectorsforgene
+therapy,wehavenottakenthissteppriortocarefuldeliberationwithinthescientificcommunity.
+Inadditiontothesecomputationalsafeguards,ourexperimentalframeworkwasdesignedtobeintrinsically
+safeandcontrollable. Weselectedthelyticphage ΦX174,aswellasitsnon-pathogenichost,E.coliC,asour
+designtemplate. Thissystemiswell-studied,tractable,andhasalonghistoryofsafeuseinmolecularbiology
+research (Barrell et al., 1976; Goulian et al., 1967; Jaschke et al., 2012; Sanger et al., 1977; Smith et al.,
+2003). Ourmethodalsoallowsforprecise,user-specifiedconstraintsincludingastricttropismfiltertoensure
+thatgeneratedphagesweredesignedtospecificallytargetourlaboratoryhoststrain,whichoffersmorecontrol
+thantraditional“phagehunting”methodsthatisolatephagesfromtheenvironmentwithunknownhostranges
+orphenotypes. Thesuccessofourtropismconstraintwasvalidatedexperimentally,asnoneofthe285tested
+assembliesshowedactivityagainstoff-targetE.coliK-12strains.
+Allexperimentsalsoleverageddecadesofprecedentandestablishedbiosafetyprotocolsforworkingwith
+phageandnon-pathogenicbacterialhosts(Bergetal.,1975). Asanadditionalprecaution,allworkinvolving
+phageswasperformedwithinabiosafetycabinetwithappropriatePPEanddedicatedequipment,whichwas
+regularly sterilized with 70% ethanol, 10% bleach, and UV treatment, and any waste was disposed of as
+biohazardouswaste. Furthermore,theriskofsignificantecologicaldisruptionbyanydesignedΦX174-variant
+phageisminimal,givenbothourcontainmentstrategiesandthepowerfulsystemsthatbacteriahaveevolved
+forphagedefense.
+We implemented multiple safeguards to ensure that the establishment of whole-genome design in this
+study was conducted responsibly. We view bacteriophages as a biologically safe testbed for developing this
+foundational technology, which is fundamentally distinct from the development of viruses with eukaryotic
+hosts. Future work leveraging AI tools to design or adapt components of human pathogens or infectious
+agentsshouldbeapproachedwithsubstantialcautionandconductedinaccordancewithallapplicablepolicies,
+regulations,andbestpractices. Weconcludebynotingthattheabilitytounderstandandmanipulatecomplex
+biologicalsystemstocurediseaseandeasehumansufferinghasbeenalongstandinggoalofscientificresearch.
+Ifdonesafelyandresponsibly, generativeAIsystemshaveimmensepromiseforadvancinghumanitytoward
+thisgoal.
+24
+
+--- Page 25 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+B. Methods
+B.1. Generativemodelingofbacteriophagegenomes
+B.1.1. GeneratingsequenceswithEvo
+Sequence sampling was performed using a standard autoregressive sampling algorithm with the sampling
+codefromhttps://github.com/evo-design/evo/andhttps://github.com/arcinstitute/evo2,whichleverages
+kv-caching of Transformer layers (Chang & Bergen, 2024) and the recurrent formulation of Hyena layers
+for efficient, low-memory autoregressive generation (Brixi et al., 2025; Nguyen, Poli, Durrant, et al., 2024;
+Nguyen,Poli,Faizi,etal.,2024).
+B.1.2. Generatingsequenceswithbacteriophagerealmprompts
+ForEvo17B131K,approximately10,000sequencesoflength6,000weresampledwithtemperature=0.7,
+top-k=4,andtop-p=1foreachprompt. Sequencesweregeneratedusingtheprompts|r__Duplodnavi
+ria;k__, |r__Monodnaviria;k__, and |r__Riboviria;k__. For Evo 2 7B 1M, approximately 1,000
+sequencesoflength6,000weresampledwithtemperature=0.7,top-k=4,andtop-p=1foreachprompt.
+Sequences were generated using the prompts |r__Duplodnaviria;;;;;;;|, |r__Monodnaviria;;;;
+;;;|,and|r__Riboviria;;;;;;;|.
+B.1.3. Generatedbacteriophagerealmsequenceanalyses
+Foruseaspositivecontrols,naturalsequencescorrespondingtotherealmsDuplodnaviria,Monodnaviria,and
+RiboviriawereextractedfromtheOpenGenomestage2trainingdataset(Nguyen,Poli,Durrant,etal.,2024)
+by filtering entries whose taxonomy strings began with |r__Duplodnaviria, |r__Monodnaviria, or
+|r__Riboviria, respectively. From each realm, 10,000 sequences were randomly sampled. Sequences
+containing only canonical nucleotides (A, C, G, T) were retained for downstream use. For use as negative
+controls, scrambled natural sequences were generated by randomly permuting the nucleotide order of each
+sequence using a fixed random seed (42) to preserve overall nucleotide composition while ablating higher-
+orderstructure.
+To analyze novelty of generated sequences, the generated sequences were searched against natural se-
+quences in the core_nt database by nucleotide BLAST (blastn, E-value = 0.5, default settings) (Camacho et
+al., 2009). Querycoverage andpercentidentityofthetop100targethitswerecollected foreachgenerated
+sequence. Todeterminetheproportionofgeneratedsequencesthatclassifyasviral,thesequenceswereana-
+lyzedbygeNomadversion1.8.0(Camargoetal.,2023). CodingdensitywasdeterminedbypredictingORFs
+usingProdigalversion2.6.3(Hyattetal.,2010)anddividingthetotalsumofORFlengthspersequencewith
+thetotallengthofthesequence. ThepTMandmeanpLDDTscoresofpredictedproteinswereextractedfrom
+their structures folded by ESMFold (Lin et al., 2023), specifically the Hugging Face implementation of the
+facebook/esmfold_v1checkpointaccessedviatheTransformerslibrary. Phage-likecodingsequenceswere
+predictedwithourgeneannotationmethod(seeORFcallingandgeneannotation),andvisualizedbyLoVis4u
+with flags -hl, --set-category-colour, -cA4p2, -alip (Egorov & Atkinson, 2025). Percent protein
+sequence identities of the generated proteins were determined by aligning them against Prodigal-predicted
+proteinsinOpenGenome(Nguyen,Poli,Durrant,etal.,2024),andproteinsinthePHROGsdatabase(Terzian
+etal.,2021)withMMseqs2version13.45111(Steinegger&Söding,2017)withsensitivity=4.0. Functional
+annotationscuratedforPHROGs(Terzianetal.,2021)wereextractedforgeneratedproteinswithsignificant
+alignmentsagainstproteinsinthePHROGsdatabase.
+B.1.4. Microviridaedata
+A total of 15,507 Microviridae genomes were collected from public databases as following: 4,498 genomes
+weredownloadedwiththeirassociatedmetadatafromNCBIDatasetsonJuly8,2024withthekeyword‘Mi-
+croviridae’andthefilter‘complete’(O’Learyetal.,2024),130genomesweredownloadedfromthePhageScope
+database on July 31, 2024 with default filters, the taxonomy ‘Microviridae’, and sequence quality ‘Complete’
+(R. Wang et al., 2024), and 10,879 genomes of the virus family ‘Microviridae’ were downloaded from the
+OpenGenome database (Brixi et al., 2025; Nguyen, Poli, Durrant, et al., 2024). 261 genomes over 10 kb
+25
+
+--- Page 26 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+in length or containing characters other than ‘A’, ‘C’, ‘G’, or ‘T’ were removed. The filtered sequences were
+clustered at 99% identity by MMseqs2 version 13.45111 (Steinegger & Söding, 2017) and a total of 14,466
+finalsequenceswereextracted. Therelativeproportionsofavailablesequencingdataforbacteriophagefam-
+ilieswereanalyzedfrom‘Complete’genomescollectedfromNCBIVirusonMay12,2025(Quinones-Olvera,
+n.d.)(https://github.com/nataquinones/phage_genome_size/). For analyses involving ΦX174 variants,
+a total of 134 ΦX174 variant sequences were extracted from the raw Microviridae data by searching for the
+keyword‘phix174’.
+B.1.5. Datapreprocessingforsupervisedfine-tuning
+Microviridae sequences were aligned to the ΦX174 NCBI reference sequence NC_001422.1 using align.
+align_optimal from the biotite Python package version 0.39.0 (Kunzmann & Hamacher, 2018) and the
+sequences were prepended with tokens indicating their percent sequence identity to ΦX174. All sequences
+were prepended with the token “+” indicating Microviridae. After the “+” token, sequences with 95–100%
+identity to ΦX174 were prepended with “∼”, 80–95% with “ˆ”, 70–80% with “#”, 50–70% with “$”, and
+<50% with “!”. Note that this soft-prompting strategy was not used for the final generation of generated
+phagecandidates;however,thetokens“+∼”wereprependedtoeverypromptbeforegeneration. Beforefine-
+tuning, phage genomes were randomly split into 14,266 training sequences, 100 validation sequences, and
+100testsequences.
+B.1.6. Supervisedfine-tuningofEvo1
+Afullfine-tuneoftheEvo17B131Kmodelwasconductedfor5,000iterationsacross16NvidiaH100GPUs,
+withabatchsizeof64samplesandacontextlengthof10,240tokens,correspondingtoaglobalbatchsizeof
+655,360tokens. Eachsamplecorrespondedtoasinglephagegenome,includingspecialprompttokens,where
+sequencesshorterthan10,240tokenswerepaddeduptothecontextlengthandwherethetraininglosswas
+only defined on the sequence, excluding pad tokens. Most of the hyperparameters used during pretraining
+were retained (Nguyen, Poli, Durrant, et al., 2024) but the initial learning rate was set to 0.00009698 with
+linearwarmupthrough5%ofthefine-tuningiterationsfollowedbycosinedecaythroughtheremainingfine-
+tuningiterationstoaminimumlearningrateof0.00003.
+B.1.7. Supervisedfine-tuningofEvo2
+A full fine-tune of the Evo 2 7B 8K model was conducted for 12,000 iterations across 32 Nvidia H100 GPUs,
+withabatchsizeof32samplesandacontextlengthof10,240tokens,correspondingtoaglobalbatchsizeof
+327,680tokens. Eachsamplecorrespondedtoasinglephagegenome,includingspecialprompttokens,where
+sequencesshorterthan10,240tokenswerepaddeduptothecontextlengthandwherethetraininglosswas
+only defined on the sequence, excluding pad tokens. Most of the hyperparameters used during pretraining
+wereretained(Brixietal.,2025)buttheinitiallearningratewassetto0.00001withlinearwarmupthrough
+5% of the fine-tuning iterations followed by cosine decay through the remaining fine-tuning iterations to a
+minimumlearningrateof0.000001.
+B.1.8. Positionalentropyanalysis
+Per-position entropy was calculated as the entropy of the conditional probability 𝑝(𝑥 𝑖 |𝑥 1 ,...,𝑥 𝑖−1) predicted
+by Evo at each position 𝑖 for token 𝑥. The positional entropies of all ΦX174 variants extracted from the
+𝑖
+Microviridae dataset were calculated by Evo 1 7B 131K, Evo 2 7B 8K, and training checkpoints of the Evo 1
+SFT and Evo 2 SFT models at 5K steps and 12K steps, respectively, using a custom script (Data and code
+availability). Per-position entropies were averaged across sequences of length 5386 and smoothed with a
+Savitzky–Golayfilter,withawindowlengthof10andpolynomialorderof3.
+B.1.9. Designconstraints
+Sequences were subject to a variety of nucleotide- and gene-level design constraints to determine their bio-
+logicalfeasibility(Data and code availability). Thedesignconstraintswereseparatedintothreecategories
+based on their purpose: quality control, host tropism specificity, and sequence diversification. Quality con-
+trol constraints included filtering for sequences with only characters A, C, G, T, sequence length of 4–6 kb,
+26
+
+--- Page 27 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+30–65%GCcontent,DNAhomopolymerlengthof ≤10nt,andpredictedproteinhitcount ≥7(FigureS7A).
+Proteinsequenceswerepredictedusingourcustomgeneannotationmethod(seeORFcallingandgeneanno-
+tation). Sequencesretainedafterapplyingqualitycontrolfilterswerepassedtothetropismfilter,whichkept
+sequences containing a spike protein with ≥60% protein sequence identity to ΦX174 spike protein, deter-
+minedbyMMseqs2version13.45111(Steinegger&Söding,2017)withsensitivity=4.0(FigureS7A).The
+tropism-filteredsequenceswerethenmanuallyinspectedorpassedtofurtherdiversificationfilters,including
+architecturalsimilarityscore ≤0.9,averageaminoacididentity(AAI) ≤95%,syntenybreakofonegene,and
+total gene count of 10 or 12 genes (Figure S7A). Generated sequences were additionally analyzed, but not
+filtered with, CheckV version 0.7.0 (Nayfach et al., 2021) with default settings, to determine viral sequence
+quality. SequenceswerevisualizedbyLoVis4uwithflags-hl,--set-category-colour,-cA4p2,-alip
+(Egorov&Atkinson,2025)toaidmanualinspection.
+B.1.10. ORFcallingandgeneannotation
+To enable accurate gene-level design constraints, various gene prediction methods were compared using the
+referenceΦX174genomeNC_001422.1. Prodigalversion2.6.3wasrunwiththeflagthe-pmeta(Hyattetal.,
+2010). Pyrodigal-gv version 0.3.2 was run with default settings (Camargo et al., 2023). Phanotate version
+1.6.5wasrunwithdefaultsettings(McNairetal.,2019). pLannotatewasrunviathewebserver(http://plan
+notate.barricklab.org/)usingdefaultparameters(McGuffie&Barrick,2021). GlimmerwasruninGeneious
+Primeversion2025.1.2withthefollowingparameters: minimumgenelength=90,maximumoverlaplength
+= 1200, start codons = ATG, stop codons = TAG/TGA/TAA, and genetic code = 11 (Delcher et al., 2007).
+GeneMark annotation was performed using MetaGeneMark version 3.42 via the web server (https://gene
+mark.bme.gatech.edu/heuristic_gmhmmp.cgi) with default parameters (Besemer & Borodovsky, 2005).
+These methods failed to predict all 11 genes in the ΦX174 genome, which prompted us to create our own
+methodtailoredtoΦX174(Fig. S4C;Dataandcodeavailability). First,genomeswere“pseudo-circularized”,
+by searching for the first stop codon position in each reading frame, identifying the most downstream first
+stopcodonposition,extractingthesequenceuptothatposition,andappendingittotheendofthegenome.
+Then, all possible ORFs were determined using orfipy (Singh & Wurtele, 2021) with the input start codon
+ATG, and output stop codons, TAA, TAG, and TGA. Finally, an all-by-all search was performed against the
+PHROGsdatabase(Terzianetal.,2021)usingMMseqs2version13.45111(Steinegger&Söding,2017)with
+sensitivity = 4.0. For each hit against the PHROGs database, only the most significant hit (lowest E-value)
+waskeptasthepredictedannotation.
+B.1.11. Geneticarchitecturesimilarityscoring
+Toevaluatearchitecturalchangesingenomesequences(i.e.,thearrangementofopenreadingframes)com-
+pared to the reference ΦX174 genome NC_001422.1, we created a genetic architecture scoring algorithm
+(Dataandcodeavailability).Sincelocalandglobalsequencealignmentmethodsbasedondynamicprogram-
+mingalgorithmsarecompute-inefficient(Steinegger&Söding,2017),andpercentidentitycalculatedfromse-
+quencealignmentdoesnotdirectlyinformchangesingeneticarchitecture,wereasonedthatasimpledotprod-
+uctscoringmethodwouldbeafastwaytobroadlydeterminechangesinthegeneticarchitecturesofsequences.
+The genes in ΦX174 begin with an ATG start codon and end with a stop codon (TAA, TAG, TGA). Thus, we
+reasonedthatwecouldquicklycompareageneratedarchitecturewiththegroundtruthΦX174genomearchi-
+tecturebyone-hotencodingstartandstopcodonpositions,creatingsparsevectorsthatrepresentthebound-
+ariesofgenes. Wecreatedone-hotencoded‘truth’vectorsofΦX174:avectorTwhichisGaussianblurred(𝜎=
+5)tocreatefuzzygeneboundariesthattolerateslightpositionalshiftswithoutover-penalizingnear-matches,
+andaweightvectorWthatismultipliedbyaweightfactorequivalenttothetotalnumberofgeneboundaries.
+A ‘query’ matrix of the one-hot encoded vectors of all circular permutations of a generated sequence is then
+scoredwithNumPyoperations(Harrisetal., 2020)np.multiply(W,np.max(np.dot(T,Q)))/N, where
+𝑁 is the genetic architecture score of the ΦX174. Thus, a score of 1 indicates an exact match to the genetic
+architectureofΦX174.
+B.1.12. UMAPvisualizationofgeneticarchitectures
+One-hotencodedgeneticarchitecturevectorswiththehighestgeneticarchitecturesimilarityscoretoΦX174
+werecomputedforgenomesintheMicroviridaetrainingdataandstoredinanAnnDataobject(Virshupetal.,
+27
+
+--- Page 28 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+2021). Using Scanpy (Wolf et al., 2018), the vectors were Z-score normalized and reduced to 50 principal
+componentsbyPCA.A𝑘-nearestneighborgraph(𝑘=50)wasconstructedonthePCArepresentation,UMAP
+wasappliedfornon-lineardimensionalityreduction,andtheresultingUMAPembeddingswerevisualized.
+B.1.13. ΦX174genomepromptanalysis
+AllΦX174variantsextractedfromtheMicroviridaetrainingdatasetwerealignedwithMAFFT(Katoh&Stan-
+dley,2013)inGeneiousPrimeversion2025.1.2(https://www.geneious.com/). Theconsensusstartsequence
+wasdeterminedbyanalyzingthemultiplesequencealignmentbyWebLogo(https://weblogo.berkeley.edu/l
+ogo.cgi)(Crooksetal.,2004). Increasingamountsofnucleotidesfromtheconsensusstartsequencewereused
+toprompttheEvo17B131K,Evo27B1M,Evo1SFT,andEvo2SFTmodelswithgenerationtemperature=
+1.1,top-k=4,top-p=1. Promptlengthsspanned1to11nucleotides,andallpromptswereprependedwith
+“+∼” finetuning tokens. Approximately 1,000 sequences of length 6,000 were generated with each prompt.
+PercentrecallofΦX174perpromptwasdeterminedasthepercentofgeneratedsequencesperpromptwitha
+significant alignment against the reference genome ΦX174 NC_001422.1, using MMseqs2 version 13.45111
+(Steinegger&Söding,2017)withsensitivity=7.5.
+B.1.14. Modeltemperatureandpromptsamplingsweeps
+To determine the optimal parameter combination for phage genome generation with the Evo 1 SFT and Evo
+2 SFT models, sampling sweeps were conducted by systematically varying both model temperature and the
+nucleotide sequence prompt. Temperature sweeps were performed across five configurations: 0.3, 0.5, 0.7,
+0.9,and1.1. Promptlengthsspanned1to11nucleotidesoftheΦX174consensusstartsequence. Allprompts
+were prepended with “+∼” fine-tuning tokens. Approximately 1,000 sequences were sampled per tempera-
+ture–prompt parameter combination. Allsampling runs were performed with top-k =4 and top-p = 1. The
+parametersweepswereevaluatedbyShannondiversity(Figure2J),retentionrateafterfiltering(Figure2K),
+and diversity of architectural similarity score vs. percent spike protein sequence identity (Figure S6). Addi-
+tionalsamplingsweepswereperformedacrossmodelcheckpoints,fine-tuningtokens,top-kvalues,andtop-p
+values,butwerenotusedforfinalevaluationofgenerationconditions.
+B.1.15. Shannondiversityanalysis
+Shannon entropy was used to quantify sequence diversity (Data and code availability) in generated se-
+quences,Microviridaegenomes,scrambledMicroviridaegenomes,andthe ΦX174referencegenomeNC_001
+422.1. Generated sequences for each temperature and prompt length were filtered with quality control and
+tropismconstraintsbeforebeinganalyzed. Foreachdataset,sequenceswereclusteredusingMMseqs2version
+13.45111(Steinegger&Söding, 2017)at99%nucleotideidentity, thenShannonentropywascalculatedon
+theresultingdistributionofsequencespercluster.
+B.1.16. Sequencefilteringretentionrateanalysis
+Generated sequences for each temperature and prompt length were filtered with quality control, tropism,
+and diversification constraints (Figure S7A), and the percentage of sequences passing each group of filters
+(retention rate) was calculated. The maximum retention rate across all temperature and prompt combina-
+tionswasusedtodeterminemodelperformance. DesignconstraintswereappliedtoMicroviridae,scrambled
+Microviridae,andΦX174variantsequencesascontrols.
+B.2. Functionalassaysofbacteriophagegenomes
+B.2.1. Biosafetyandsteriletechnique
+AllexperimentsinvolvingbacteriophageparticleswereconductedinaClassIITypeA2biosafetycabinetmeet-
+ingNSF/ANSI49,OEMspecifications,andISO14644-1standard. Pipettesanda37◦Cincubatorwerededi-
+catedforuseonlywithactivebacteriophagecultures. Equipmentwasregularlysterilizedwith70%ethanol,
+10% bleach, and UV treatment. For all experiments, appropriate PPE was worn and sterile filter pipette tips
+wereused. Anysolidorliquidwasteproducedfromexperimentswasdiscardedasbiohazardwaste.
+28
+
+--- Page 29 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+B.2.2. Bacterialandbacteriophagegrowthmedia
+Unlessstatedotherwise,bacteriaweregrowninliquidcultureof“LB”consistingofLBMillerbroth(Thermo
+Fisher Scientific #H26676). Bacteriophages were propagated with bacteria in liquid culture of “phage LB”
+mediaconsistingof10g/Ltryptone(RPI#T60060),5g/Lyeastextract(IBI#IB49161),10g/LNaCl(Thermo
+FisherScientific#S271),and2mMCaCl2(J.T.Baker#1332). Bacterialcoloniesandbacteriophageplaques
+weregrownin“phageLBagar”consistingof7g/Lagar(Carolina#84-2133)inphageLB.
+B.2.3. Bacterialstrains
+LyophilizedE.coliCderivedfromATCC13706(Microbiologics#0747P)wasrehydratedfollowingthemanu-
+facturer’sprotocolinsterileconditions. ThestockculturewasinoculatedinLB,incubatedovernightat37◦C
+with 170 rpm agitation, and mixed at a 1:1 volumetric ratio with 50% glycerol (Thermo Fisher Scientific
+#15514011) and stored at –80 ◦C. For preparation of E. coli C competent cells, a pipette tip was used to
+scrapeglycerolstockanddippedin5mLofLBovernightat37◦Cwith170rpmagitation,then0.5mLofthe
+overnightculturewasusedwithaMix&GoE.coliTransformationKit(ZymoResearch#T3001)followingthe
+manufacturer’sprotocol. Competentcellstockswerestoredat–80◦Candthawedonlyatthetimeofuse. The
+strains ATCC 25404 (E. coli K-12), Stbl3 (E. coli K-12/B HB101), JW5856 (E. coli K-12 W3110), Stellar (E.
+coliK-12HST08),RosettaDE3(E.coliB),Mach1(E.coliW),andMDS69(E.coliK-12withreducedgenome)
+(Karcagi et al., 2016) were a gift from Alex Gao’s lab. Glycerol stocks and competent cell stocks for these
+strainswerepreparedthesameway.
+B.2.4. Bacteriophagegenomeassemblyfrom ΦX174RFIDNA
+ΦX174am3cs70RFIDNA(NEB#N3021)wasPCR-amplifiedintoseparatesetsoftwoorthreefragments(File
+S1). The following pairs of primers were used to PCR-amplify fragments for two-fragment Gibson assembly
+of lysis mutant ΦX174 genomes with the amber (am3) mutation in the lysis gene: SK#327 + SK#324 and
+SK#323 + SK#328. The following pairs of primers were used to PCR-amplify fragments for two-fragment
+Gibsonassemblyofwild-typeΦX174genomesbyrevertingtheam3mutationtothewild-typecodon:SK#333
++SK#326andSK#334+SK#325. ThefollowingpairsofprimerswereusedtoPCR-amplifyfragmentsfor
+three-fragmentGibsonassemblyoflysismutantΦX174genomeswiththeam3mutation: SK#327+SK#332
+and SK#331 + SK#326 and SK#325 + SK#328. The following pairs of primers were used to PCR-amplify
+fragments for three-fragment Gibson assembly of wild-type ΦX174 genomes by reverting the am3 mutation
+tothewild-typecodon: SK#333+SK#322andSK#321+SK#318andSK#317+SK#334. Thefragments
+wereamplifiedusing1𝜇Lof1ng/𝜇LΦX174am3cs70RFIDNAwith0.5𝜇Leachof10uMprimers,10.5𝜇Lof
+dH2O,and12.5𝜇Lof2×CloneAmpHiFiPCRPremix(TakaraBio#639298)withthefollowingsettings:98◦C
+for30sec,98◦Cfor10secand62◦Cfor10secand72◦Cfor20secrepeated30times,and72◦Cfor5min.
+ThePCRampliconswereseparatedin1%(w/v)UltraPureAgarose(ThermoFisherScientific#16500500)in
+1× TAE gels stained with 1× SYBR Safe (Thermo Fisher Scientific #S33102) run at 120 V for 30 min, with
+GeneRuler1kbPlusDNALadder(ThermoFisherScientific#SM1331). PCRproductsofthecorrectsizewere
+purifiedbygelextractionusingaQIAquickGelExtractionKit(Qiagen#28704)followingthemanufacturer’s
+protocol. Assembly fragments were mixed with NEBuilder HiFi DNA Assembly Master Mix (NEB #E2621)
+with the volumes of each fragment calculated on https://nebuildercalculator.neb.com/, and incubated at
+50◦Cfor1hour. Assemblieswerestoredat–20◦Cuntiluse.
+B.2.5. BacteriophagegenomeassemblyfromsynthesizedDNA
+SequencesweresplitintotwoGibsonassembly-compatiblefragmentsandsynthesizedasGeneFragmentsby
+TwistBiosciences,withoutadapters,drieddownandnormalizedto250ngin96-wellplatewells.Optimalsplit
+points and overhangs for each Gibson assembly were designed with a custom Python script (Data and code
+availability)thatoutputseachfragmenttobesynthesized. Thesynthesizedfragmentswereresuspendedin
+dH2Oto10,25,or50ng/𝜇Landassembledwiththefollowingconditions: eachoftwofragmentspergenome
+were mixed at a 1:1 (v/v) ratio to a total volume of 2 𝜇L. 2 𝜇L of NEBuilder HiFi DNA Assembly Master
+Mix(NEB#E2621)wasaddedtothemixtureonicetoatotalreactionvolumeof4 𝜇Landthereactionwas
+incubatedat50◦Cfor1hour. Assemblieswerestoredat–20◦Cuntiluse. Thegenefragmentsweresealedin
+theiroriginal96-wellplateswithfoilseals(Bio-Rad#MSF1001)andstoredat–20◦C.
+29
+
+--- Page 30 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+B.2.6. Bacteriophagegenomeassemblyplaqueassay
+PhagegenomeswereassembledbyGibsonassemblyand4𝜇Loftheassemblywasmixedwith100𝜇LofE.coli
+Ccompetentcellsandleftonicefor10min. Thetransformationwasgentlymixedwith0.5mLofphageLB
+andaddedto7mLofphageLBagaratatemperatureof42–46◦CmonitoredusinganInfraredThermometer
+(Ketokek#KT600B),thenplatedimmediatelyon10cmPetridishes. Theplateswereincubatedat37◦Cfor
+3hours,wrappedwithathinstripofParafilm(MilliporeSigma#HS234526B)toretainmoisture,andstored
+at4◦C.
+B.2.7. Bacteriophagegenomeassemblygrowthassay
+PhagegenomeswereassembledbyGibsonassemblyand1𝜇Loftheassemblywasmixedwith15𝜇LofE.coli
+CorE.coliK-12competentcellsandleftonicefor10min. Thetransformationwasgentlymixedwith735𝜇L
+ofphageLBandsplitintothreewellsofaflat-bottom96-wellplate(ThermoFisherScientific#167008)with
+250 𝜇L of per well. Three wells with 250 𝜇L phage LB only were added to the plate to normalize the OD
+600
+measurements. The96-wellplatewasincubatedat37◦Cwithorbitalshakingat1.5mmamplitudeand360
+rpm in a Tecan Spark Multimode Microplate Reader, with OD measured every 15 min. After 6 hours, the
+600
+platewasremovedfromthemicroplatereaderandstoredat4◦C.
+B.2.8. Bacteriophageglycerolstocks
+Bacterialdebrisinphage-clarifiedcultureswerepelletedbycentrifugationat3,000×gfor10minat4◦C.The
+supernatant was sterile-filtered through a 0.22 𝜇m cellulose acetate Spin-X Centrifuge Tube Filter (Thermo
+FisherScientific#07-200-385)bycentrifugationat10,000×gfor3minat4◦C.Glycerolstockswereprepared
+by mixing the flow-through with 0.22 𝜇m-filtered 50% glycerol (Thermo Fisher Scientific #15514011) at a
+1:1(v/v)ratioandstoredat–80◦Cincryogenictubes(ThermoFisherScientific#11-676-48).
+B.2.9. Long-readsequencingofbacteriophagegenomesfromglycerolstocks
+Glycerol stocks prepared from the phage growth assays were individually scraped using sterile pipette tips
+anddippedinto6𝜇Lof1×phosphatebufferedsaline(PBS).Thepickedphagegenomeswereamplifiedusing
+1 𝜇L of the solution in a PCR reaction with 0.5 𝜇L each of 10 uM primers (File S1), 10.5 𝜇L of dH2O, and
+12.5𝜇Lof2×CloneAmpHiFiPCRPremix(TakaraBio#639298)withthefollowingsettings: 98◦Cfor30sec,
+98◦Cfor10secand62◦Cfor10secand72◦Cfor20secrepeated30times,and72◦Cfor5min. ThePCR
+amplicons were separated in 1% (w/v) UltraPure Agarose (Thermo Fisher Scientific #16500500) in 1×TAE
+gelsstainedwith1×SYBRSafe(ThermoFisherScientific#S33102)runat120Vfor30min,withGeneRuler
+1kbPlusDNALadder(ThermoFisherScientific#SM1331). PCRproductsofthecorrectsizewerepurifiedby
+gelextractionusingaQIAquickGelExtractionKit(Qiagen#28704)followingthemanufacturer’sprotocoland
+sequenced using Plasmidsaurus’ Standard Purified Linear/PCR sequencing service. Sequences were aligned
+byMAFFTv7(Katoh&Standley,2013)onBenchling(https://www.benchling.com/).
+B.2.10. Bacteriophagepropagationandharvesting
+A glycerol scrape of E. coli C was inoculated in 5 mL of LB and incubated at 37 ◦C overnight with 200 rpm
+agitation. 3mLoftheovernightculturewasmixedwith247mLofphageLBandgrowntoanOD
+600
+of∼0.4.
+A scrape of phage glycerol stock was added to the culture and clarified for up to 9 hours. The lysed debris
+waspelletedbycentrifugationat4,000×gfor10minat4◦Candsterile-filteredthrougha0.22𝜇mporesize
+PES membrane filter (Millipore Sigma #S2GPU05RE). The phages Evo-Φ46, Evo-Φ111, and Evo-Φ114 were
+doublepropagatedduetolowtiter,byadding3mLofthefirstharvestto297mLofphageLBandincubating
+for9hours. ThephagesEvo-Φ36andEvo-Φ108weresimilarlypropagatedbutwithathirdpropagationdue
+tolowtiter.
+B.2.11. Bacteriophagetitering
+A glycerol scrape of E. coli C was inoculated in 5 mL of LB and incubated at 37 ◦C overnight with 200 rpm
+agitation. 50 𝜇Loftheovernightculturewasmixedwith5mLofphageLBandincubatedat37◦Cwith200
+rpmagitation.TheculturewasgrowntoanOD of0.3–0.4and675𝜇Loftheculturewasaddedto22.5mLof
+600
+30
+
+--- Page 31 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+phageLBagaratatemperatureof42–46◦C.ThetemperaturewasmonitoredusinganInfraredThermometer
+(Ketokek #KT600B). The mixture was poured in a 15 cm Petri dish and allowed to solidify for up to 5 min.
+2𝜇Lof10-foldserialdilutionsofphageinphageLBfrom100to10-10wasspottedontheagarandfullydried
+forupto15min. Anadditional2 𝜇LspotofphageLBonlywasalsospottedasanegativecontrol. Theplates
+were inverted and incubated at 37 ◦C for 3 hours, imaged, wrapped with a thin strip of Parafilm (Millipore
+Sigma#HS234526B)toretainmoisture,andstoredat4◦C.ImagesweretakenonaniPhonewithacustom
+backlightsetupandconvertedtoblackandwhitebydecreasingthesaturationto0. Individualvisibleplaques
+werecountedatthehighestdilutionwheretheywerepresentacrossallthreereplicates,andthetiter(plaque
+formingunits(PFU)/mL)perphagewascalculatedas((averageplaquecount/spotvolume(mL))×dilution
+factor).
+B.2.12. Hosttropismassay
+ForeachE.colistrain,aglycerolscrapewasinoculatedin5mLofLBandincubatedat37◦Covernightwith
+200rpmagitation. 250𝜇Loftheovernightculturewasmixedwith25mLofphageLBandincubatedat37◦C
+with 200 rpm agitation. The culture was grown to an OD of 0.4–0.6 and 200 𝜇L per well was plated in
+600
+a flat-bottom 96-well plate (Thermo Fisher Scientific #167008). 50 𝜇L of phage stock at a concentration of
+∼105PFU/mLwasthenaddedtoeachwell. Asnegativecontrols,50 𝜇LofphageLBwasaddedtoeachwell
+instead of phage. Three wells with 250 𝜇L phage LB only were added to the plate to normalize the OD
+600
+measurements. The96-wellplatewasincubatedat37◦Cwithorbitalshakingat1.5mmamplitudeand360
+rpminaTecanSparkMultimodeMicroplateReader,withOD
+600
+measuredevery15min. After∼12hours,the
+platewasremovedfromthemicroplatereaderandstoredat4◦C.
+B.3. Phylogeneticanalysisofbacteriophages
+B.3.1. Naturalreferencegenomes
+Unlessotherwisenoted,thewild-typeΦX174referencegenomeusedforallphylogeneticanalyseswassourced
+fromNCBIaccessionNC_001422.1,andthewild-typeG4referencegenomeusedforallphylogeneticanalyses
+wassourcedfromNCBIaccessionNC_001420.2.
+B.3.2. Syntenyanalysis
+Synteny was visualized by LoVis4u with flags -hl, --set-category-colour, -cA4p2, -alip, (Egorov
+& Atkinson, 2025) using GFF3 files for each phage genome created with a custom script (Data and code
+availability). Pairwisesyntenybetweeneachphagegenomewasdeterminedintheorderpresented(Figure
+4A) and consolidated into a single synteny plot. Since our gene annotation method only partially predicted
+geneA*,itwasomittedfromsyntenyvisualization. Synonymous,nonsynonymous,andnoncodingmutations
+weredeterminedbyaligningeachgeneratedgenomeagainsttheΦX174referencegenomewithMAFFT(Katoh
+&Standley, 2013)inGeneiousPrimeversion2025.1.2(https://www.geneious.com/), setting ΦX174asthe
+reference sequence, finding variations/SNVs with Inside\&OutsideCDS and genetic code set as Bacter
+ial, then colored by ProteinEffect. If synonymous and nonsynonymous mutations overlapped due to
+overlappinggenes,thenonsynonymousmutationwasvisualizedasthetoplayer. Genessharingsyntenywith
+ΦX174 were determined using a custom script (Data and code availability) analyzing the pairwise protein
+identity matrix calculated by LoVis4u. For simply visualizing SNVs relative to ΦX174, ΦX174 was set as the
+reference sequence and the default mutation highlighting in Geneious Prime was exported and overlaid on
+thesyntenyvisualization.
+B.3.3. Whole-genomealignment
+Unless otherwise noted, whole-genome alignments were performed with MAFFT (Katoh & Standley, 2013)
+in Geneious Prime version 2025.1.2 (https://www.geneious.com/). To determine percent genome identity
+ofgeneratedphagegenomecandidatescomparedto ΦX174andsequencesintheMicroviridaetrainingdata,
+genomeswerealignedbynucleotideBLAST(blastn,E-value=0.5,defaultsettings)(Camachoetal.,2009)in
+GeneiousPrime,andpercentgenomeidentitywascalculatedas(percentidentity×percentquerycoverage).
+PercentgenomeidentityofsequencesintheMicroviridaetrainingdatacomparedtoΦX174weredetermined
+byMMseqs2version13.45111(Steinegger&Söding,2017)withdefaultsettings.
+31
+
+--- Page 32 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+B.3.4. Mutationalcounttonearestnaturalgenomeanalysis
+GeneratedphagegenomecandidateswerealignedtosequencesintheMicroviridaetrainingdatabynucleotide
+BLAST (blastn, E-value = 0.5, default settings) (Camacho et al., 2009) in Geneious Prime version 2025.1.2
+(https://www.geneious.com/). Percent genome identity of each generated sequence to its nearest natural
+sequence was calculated as (percent identity × percent query coverage). The number of novel nucleotide
+mutations in each generated genome was estimated as ((1 (percent genome identity / 100)) × generated
+genomelength).
+B.3.5. Cumulativegenomeattributionanalysis
+To determine if mutations in the generated genomes could be attributed to existing mutations in natural
+genomes, the top 1,000 alignments (E value < 1.0) for each generated genome were determined using nu-
+cleotideBLAST(blastn,E-value=0.05,defaultsettings)(Camachoetal.,2009). Basepair-levelattributions
+followedagreedyapproach,whereexactnucleotidematcheswerefirstassignedtothehighest-scoringBLAST
+hit, then remaining unassigned positions were iteratively assigned to lower-scoring hits in descending order
+untilcompleteassignmentornoadditionalmatcheswerepossible.
+B.3.6. Phylogenetictreeconstruction
+AmultiplesequencealignmentofrepresentativeMicroviridaeandgeneratedphagegenomeswasconstructed
+with MAFFT (Katoh & Standley, 2013) in Geneious Prime version 2025.1.2 (https://www.geneious.com/).
+TheresultingMSAwasusedtobuildaNeighbor-JoiningtreewiththeGeneiousTreeBuildertoolwithaJukes-
+Cantor genetic distance model and no outgroup. The following natural reference genomes collected from
+NCBIwereusedforphylogenetictrees: NC_001422.1(ΦX174),KY653237.1(alpha-𝛼),DQ079890.1(NC41),
+DQ079885.1(NC5),DQ079891.1(NC51),andAF274751.1(S13),NC_001420.2(G4),NC_012868.1(St-1),
+NC_001730.1(ΦK),NC_007821.1(WA13),NC_001330.1(𝛼3).
+B.3.7. Mutationalhotspotanalysis
+Nucleotide sequences corresponding to annotated genes, promoters, and terminators from wild-type ΦX174
+(Logel&Jaschke,2020)werealignedagainstallgeneratedgenomesusingnucleotideBLASTversion2.16.0+
+(blastn-short, ungapped, word_size = 4, E-value = 0.2) (Camacho et al., 2009). For each alignment, total
+mutations were defined as the sum of reported mismatches and unaligned query residues, with the overall
+mutation rate calculated as the number of total mutations divided by the length of the query sequence. For
+eachgene,promoter,andterminator,themeanmutationratewascalculatedbyaveragingindividualmutation
+ratesacrossallviablegeneratedgenomes.
+B.4. Structuralanalysisofbacteriophages
+B.4.1. Proteinstructureprediction
+F(capsid),G(spike)andJ(DNApackaging)proteinswereco-foldedbyAlphaFold3(Abramsonetal.,2024)
+viatheonlinewebserver(https://alphafoldserver.com/). PAEwasvisualizedwithhttps://thecodingbiologist
+.com/tools/pae.htmlandpredictedstructureswerevisualizedwithUCSFChimeraXversion1.7.1(Pettersen
+etal.,2021).
+B.4.2. Bacteriophagepurificationforcryo-EM
+E.coliCwasgrownin300mLofphageLBat37◦Cwith200rpmagitationuntilreachingOD
+600
+0.4–0.6,at
+whichtheywereinoculatedwith3mLofphagefor3.5–8hours. Chloroformwasaddedtoculturestoafinal
+dilution of 1% and incubated for 15 min at 25 ◦C with 200 rpm agitation for complete lysis. Lysed cultures
+werepelletedbycentrifugation(3,000×g,10min,4◦C),andsterile-filteredthrougha0.22𝜇mporesizePES
+membranefilter(MilliporeSigma#S2GPU05RE).Filteredlysatewassupplementedwithpolyethyleneglycol
+8,000,pH7.4(8%),100mMNaClandincubatedwithend-over-endrotationat4◦Cfor1hour,beforeincu-
+bationat4◦Cfor2–16hourswithoutrotation. Thephagepelletwasobtainedbycentrifugation(11,000×g,
+20 min, 4 ◦C) andresuspended in4 mL PBSpH 7.4, 10 mM MgCl2, to which50 U/mL BenzonaseNuclease
+32
+
+--- Page 33 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+(Teknova#E1014)wassubsequentlyadded. Themixturewasincubatedfor45minat37◦C,withgentlemix-
+ingevery15min. Thephagesuspensionwascarefullyplacedontopofamanuallyconstructeddiscontinuous
+iodixanol(Teknova#21449,#21443,#21431,#21425)densitygradient(60%,40%,25%,15%),andsub-
+jectedtoultracentrifugation(200,000×g,2–4hours,4◦C).Visiblephagebands(atthe60%/40%fraction
+boundary) were carefully extracted and buffer exchanged by four rounds of centrifugation (15,000 × g, 10
+min,4◦C)in100kDamolecularweightcut-offAmiconcentrifugalfilters(Millipore#UFC510024)followed
+byresuspensionin20mMTrispH7.4,100mMNaCl.
+B.4.3. Polyacrylamidegelelectrophoresis(PAGE)
+SDS-PAGEwasperformedusing4–20%SurePAGEprecastgels(GenScript#M00657)inXCellSureLockMini-
+cell gel chambers (Thermo Fisher Scientific #EI0001). Before loading onto gels, samples were mixed with
+4× Laemmli buffer (62.5 mM Tris HCl, pH 6.8, containing 2% (w/v) SDS, 10% (v/v) glycerol, and 0.002%
+(w/v)bromophenolblue)andboiledat99◦Cfor3min. Gelswererunat200Vin1×MESSDSRunningBuffer
+(Genscript#M00677)alongsideSeeBluePlus2Pre-stainedProteinStandardladder(Invitrogen#LC5925)or
+PageRulerPlusPrestainedProteinladder(ThermoFisherScientific#26619). GelswerestainedwithInstant-
+BlueCoomassie(AbCam#ab119211)forupto1hourwithgentleshakingandde-stainedforatleast1hour
+withMilli-QwaterpriortoimagingonaGelDocGoimager(Bio-Rad). ImageLabversion6.1.0(Bio-Rad)was
+usedforanalysis.
+B.4.4. Gridpreparationforcryo-EM
+Phagesampleswerepurifiedasdescribedaboveandstoredat4◦Cpriortocryo-EMgridpreparation. 3.2𝜇Lof
+thepurifiedphagewasappliedtoR1.2/1.3,300meshcarbonCugrids(QUANTIFOIL#Q3100CR1.3)which
+wereglow-dischargedusingaPELCOeasiGlowsystemwith10mAnegativecurrentforatotalperiodof90s
+at0.26mBarwitha10sholdperiod. Thegridswereplunge-frozeninliquidethaneusingaVitrobotMarkIV
+(ThermoFisherScientific)maintainedat100%humidityand8◦Cwithablottimeof3sandablotforceof
+3.5. Thegridswerestoredinliquidnitrogen.
+B.4.5. Cryo-EMdataacquisition
+Gridsof ΦX174andEvo-Φ36wereinitiallyscreenedonaGlacioselectronmicroscope(ThermoFisherScien-
+tific). Onehigh-qualitygridforeachphagewasselectedfordatacollectionandimagedonaGlacioselectron
+microscope (Thermo Fisher Scientific) operated at 200 kV and equipped with a Falcon 4i direct electron de-
+tector. Movies were automatically collected with EPU software (Thermo Fisher Scientific) at 150,000× mag-
+nificationmagnification,correspondingtoarealpixelsizeof0.923Åatthespecimenlevel. ForΦX174,3,372
+movieswerecollectedwithadefocusrangeof-1.5to-3.0microns. Eachmoviewasrecordedover3.52swith
+atotalaccumulateddoseof41.15𝑒−/Å2,fractionatedinto40frames(∼1.03𝑒−/Å2 perframe). ForEvo-Φ36,
+4,796movieswerecollectedwithadefocusrangeof-1.5to-2.5microns. Eachmoviewasrecordedover3.79
+swithatotalaccumulateddoseof50.00𝑒−/Å2,fractionatedinto43frames(∼1.16𝑒−/Å2 perframe).
+B.4.6. Cryo-EMdataprocessing
+Cryo-EM data were processed using cryoSPARC version 4.6.2 (Punjani et al., 2017). Movies were motion-
+correctedandCTFparametersestimatedusingthepatchmotioncorrectionandpatch-basedCTFestimation
+jobs. Initialparticleswerepickedondenoisedmicrographsbyblobpickingusingacircularblobwithparticle
+diameterbetween250Åand325Å.Pickedparticleswereextractedwithaboxsizeof512pixelsandclassi-
+fied in 2D to select representative 2D classes for use as templates. Resulting particles from template-guided
+particlepickingwereextractedwithaboxsizeof512pixelsandsubjectedto2–3roundsof2Dclassification,
+yielding24,999particlesfor ΦX174and30,228particlesforEvo-Φ36. Multipleroundsofthree-dimensional
+(3D)reconstructionandrefinement(uniformandnon-uniformwithicosahedralsymmetryimposed,aswellas
+globalandlocalCTFrefinement)wereperformedwithoutfurtherparticlesorting,withoneroundofreference-
+basedmotioncorrection, with24,547particlesand29,708particlesusedinthefinalrefinementsfor ΦX174
+andEvo-Φ36respectively. Thisresultedinfinalmapsfor ΦX174andEvo-Φ36withresolutionsof2.76Åand
+2.90Å,respectively,asdeterminedbytheirgoldstandardFouriershellcorrelationwithathresholdof0.143
+(Rosenthal&Henderson,2003). FurtherprocessingdetailsareprovidedinFigureS17. Finalmapsformodel
+33
+
+--- Page 34 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+buildingweresharpenedusingapostprocessingjobinRELION5.0withmasksconstructedinRELIONusing
+a low-pass filter of 20 Å, 1 pixel extension, and 8 pixel soft-edge with a binarization threshold of 0.015 and
+0.01forΦX174andEvo-Φ36respectively(Kimaniusetal.,2021).
+B.4.7. Cryo-EMmodelbuilding
+AlphaFold3modelsoftheF,G,andJproteinsco-foldedforeither ΦX174orEvo-Φ36weredockedintotheir
+respectivesharpenedcryo-EMdensitiesinUCSFChimeraXbeforemanualadjustmentinCootversion0.9.8.96
+(Emsley & Cowtan, 2004). Interactive molecular dynamics-based refinement was performed in ISOLDE ver-
+sion 1.9 (Croll, 2018) to correct local geometry and improve fit to density. Final refinement was carried out
+in Phenix version 1.21.2 (Liebschner et al., 2019) against the cryo-EM density maps, applying appropriate
+geometry and secondary-structure restraints. Structures were visualized with UCSF ChimeraX version 1.7.1
+or1.9.1(Pettersenetal.,2021).
+B.5. Fitnessassaysofbacteriophagegenomes
+B.5.1. Bacteriophagecompetitionassay
+AglycerolscrapeofE.coliCwasinoculatedin100mLofLBandincubatedat37◦Covernightwith200rpm
+agitation. 2 𝜇L of the overnight culture was mixed with 198 𝜇L of phage LB in a flat-bottom 96-well plate
+(ThermoFisherScientific#167008)wellsandincubatedat37◦Cwithorbitalshakingat1.5mmamplitude
+and 360 rpm in a Tecan Spark Multimode Microplate Reader. Three wells with 250 𝜇L phage LB only were
+added to the plate to normalize the OD
+600
+measurements. Once the cultures reached OD
+600
+∼0.4, 50 𝜇L of
+aphagemixtureconsistingof∼1×105PFU/mLperphageofall16generatedphagesand ΦX174wasadded
+to each well. The plate was again incubated in the microplate reader with the same conditions, with OD
+600
+measured every 10 min. Upon the initial infection, 10 𝜇L was extracted from each culture, then 10 𝜇L was
+extractedevery30minfor3hours,thenevery60minfor3hours,foratotalof6hours. Eachextractionwas
+immediatelyboiledinathermalcyclerat98◦Cfor45sandstoredin–20◦C.2 𝜇Lofthelysateateachtime
+pointwasusedinaPCRreactionwith1𝜇Leachof10uMprimersSK#324andSK#359,21𝜇LofdH2O,and
+25 𝜇Lof2×CloneAmpHiFiPCRPremix(TakaraBio#639298)withthefollowingsettings: 98◦Cfor30sec,
+98◦Cfor10secand62◦Cfor10secand72◦Cfor40secrepeated25times,and72◦Cfor5min. ThePCR
+ampliconswereseparatedin1.5%(w/v)UltraPureAgarose(ThermoFisherScientific#16500500)in1×TAE
+gelsstainedwith1×SYBRSafe(ThermoFisherScientific#S33102)runat120Vfor30min,withGeneRuler
+1 kb Plus DNA Ladder (Thermo Fisher Scientific #SM1331). PCR products of the correct size were purified
+bygelextractionusingaQIAquickGelExtractionKit(Qiagen#28704)followingthemanufacturer’sprotocol
+andsequencedusingPlasmidsaurus’StandardPCRPremiumsequencingservice.
+B.5.2. Bacteriophagecompetitionsequencinganalysis
+Therawsequencingreadsfromeachcompetitiontimepointwereanalyzedusingacustomscript(Data and
+codeavailability). SequencingreadswithaMAPQscoreof<20,analignmentlengthof<70%,andapercent
+identity of <90% against their top alignment of the generated phage genomes and ΦX174 were filtered out
+fromthe analysis. Thetop alignmenthitwas consideredthephage identityofa givensequencingread. The
+foldchangeforagivenphagegenomeateachtimepointtnfromthetimepointbeforeittn-1wascalculatedas
+thereadcountattndividedbythereadcountattn-1. Thecumulativefoldchangeforagivenphagegenomeat
+timepointtnwascalculatedasthesumofthefoldchangeofallprevioustimepointssincetheinitialinfection
+att0.
+B.5.3. Bacterialgrowthrateassay
+A glycerol scrape of E. coli C was inoculated in 5 mL of LB and incubated at 37 ◦C overnight with 200 rpm
+agitation. 250𝜇Loftheovernightculturewasmixedwith25mLofphageLBandincubatedat37◦Cwith200
+rpmagitation. TheculturewasgrowntoanOD
+600
+of∼0.4and200𝜇Lperwellwasplatedinaflat-bottom96-
+wellplate(ThermoFisherScientific#167008). 50𝜇Lofeachphagestockataconcentrationof∼105PFU/mL
+wasthenaddedtoeachwell. Asnegativecontrols,50𝜇LofphageLBwasaddedtoeachwellinsteadofphage.
+Threewellswith250 𝜇LphageLBonlywereaddedtotheplatetonormalizetheOD measurements. The
+600
+96-wellplatewasincubatedat37◦Cwithorbitalshakingat1.5mmamplitudeand360rpminaTecanSpark
+34
+
+--- Page 35 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Multimode Microplate Reader, with OD
+600
+measured every 15 min. After ∼12 hours, the plate was removed
+fromthemicroplatereaderandstoredat4◦C.
+B.5.4. Bacterialgrowthratedetermination
+Bacterial growth rates were derived from OD measurements collected at fixed time intervals. For each
+600
+replicate,growthratewascomputedasthenumericalderivativeofOD withrespecttotimeusingNumPy’s
+600
+operationnp.gradientinPython(Harrisetal.,2020),yieldinginstantaneousratesexpressedasΔOD
+600
+per
+minute.Replicatetrajectorieswerethenaggregatedtocalculatesummarystatistics(mean,standarddeviation,
+andminimumgrowthrates),whichwereusedfordownstreamcomparativeanalysesacrossphagetreatments.
+B.5.5. Statisticalanalysis
+StatisticalanalyseswereperformedinPythonusingthestatsmodelspackage(Seabold&Perktold,2010). For
+eachassaymetric(signedareaunderthecurve,minimumOD afterpeak,timetopost-peakminimum,and
+600
+minimum growth rate), replicate-level values were first cleaned by removing missing values. A type II one-
+wayanalysisofvariance(ANOVA)wasusedtotestforoveralldifferencesacrossphagegroups,withstatistical
+significancesetat𝛼=0.05. WheretheANOVAindicatedsignificance,Tukey’shonestlysignificantdifference
+(HSD)testwasappliedforallpairwisecomparisonstoidentifyspecificdifferencesbetweengroups. Replicate
+distributionswerevisualizedalongsidegroupmeansandstandarddeviations.
+B.5.6. Bacteriophageresistanceassay
+ΦX174wasassembledbyGibsonassemblyand1 𝜇Loftheassemblywasmixedwith15 𝜇LofE.coliCcom-
+petent cells and left on ice for 10 min. The transformation was gently mixed with 735 𝜇L of phage LB and
+splitintothreewellsofaflat-bottom96-wellplate(ThermoFisherScientific#167008)with250𝜇Lperwell.
+15 𝜇L of non-transformed competent cells were mixed with 735 𝜇L of phage LB and plated in another three
+wells. Threewellswith250𝜇LphageLBonlywereaddedtotheplatetonormalizetheOD measurements.
+600
+The96-wellplatewasincubatedat37◦Cwithorbitalshakingat1.5mmamplitudeand360rpminaTecan
+Spark Multimode Microplate Reader, with OD measured every 15 min. After 24 hours, the transformed
+600
+culturesreachedstableresistanceagainst ΦX174, andthenon-transformed, ΦX174-susceptibleculturesalso
+reachedequilibriumgrowth. 250 𝜇Lofeachculturewasmixedwith50%glycerol(ThermoFisherScientific
+#15514011)ata1:1(v/v)ratioandstoredat–80◦C.Toisolatesinglecoloniesfromeachstrain,theglycerol
+stocks were individually streaked out on phage LB agar plates and incubated at 37 ◦C overnight. Colonies
+were picked, dipped in 250 𝜇L of phage LB in a 96-well plate, and incubated at 37 ◦C overnight with 200
+rpm agitation. 50 𝜇L of each culture was mixed with 50% glycerol at a 1:1 (v/v) ratio and stored at –80 ◦C
+for final stocks of the resistant and susceptible E. coli C strains. Each strain’s genome was sequenced using
+Plasmidsaurus’StandardBacteriaGenomewithExtractionservice.
+To test the ability of ΦX174 and generated phages to inhibit growth of the resistant and susceptible
+strains, we devised a bacteriophage counter-resistance evolution assay similar to a previously described pro-
+tocol (Romeyer Dherbey et al., 2023). The following mixtures of phages were prepared: ΦX174 diluted to
+a concentration of ∼17 × 105 PFU/mL in phage LB (“ΦX174-only cocktail”), and all 16 generated phages
+and ΦX174 diluted together in phage LB each at a concentration of ∼1 × 105 PFU/mL (“generated phage
+cocktail”). A scrape of each glycerol stock of the resistant and susceptible strains were inoculated in 250 𝜇L
+phage LB and incubated at 37 ◦C with 200 rpm agitation overnight. For each resistant strain tested, three
+different conditions were prepared in a 96-well “seed” plate: a “mixed well” consisting of 1 𝜇L of overnight
+resistant culture with 1 𝜇L of overnight susceptible culture in 198 𝜇L of phage LB (to facilitate evolution of
+the phages in susceptible cells in the presence of resistant cells), a resistant-only well consisting of 2 𝜇L of
+overnightresistantculturein198 𝜇LofphageLB,andasusceptible-onlywellconsistingof2 𝜇Lofovernight
+susceptible culture in 198 𝜇L of phage LB. The plate was incubated at 37 ◦C with orbital shaking at 1.5 mm
+amplitudeand360rpminaTecanSparkMultimodeMicroplateReader,withOD measuredevery15min
+600
+until the cultures reached OD
+600
+∼0.4. 50 𝜇L of the ΦX174-only cocktail and the generated phage cocktail
+were added to the wells as initial infections, and three wells with 250 𝜇L phage LB only were added to the
+plate to normalize the OD measurements. The plate was again incubated in the microplate reader the
+600
+same way, for approximately 3 hours. Resistant-only wells were observed for growth inhibition, and in the
+meantime, anotherseedplatewasprepared. Eachcultureinthephage-infectedplatewastransferredintoa
+35
+
+--- Page 36 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+96-well plate (Thermo Fisher Scientific #N8010560) and the cells were pelleted at 3,000 × g for 10 min at
+4◦C.Thesupernatantswerecollectedand50 𝜇Lofthesupernatantfromeachmixedwellwaspassagedinto
+their corresponding resistant conditions in the new seed plate. Passages were repeated five times. At each
+passage,anyresistant-onlyculturewithinhibitedgrowthduetoasuccessfullycounter-evolvedphagecocktail
+washarvested: thecellswerepelletedat3,000×gfor10minat4◦C,andthesupernatantwassterile-filtered
+througha0.22𝜇mcelluloseacetateSpin-XCentrifugeTubeFilter(ThermoFisherScientific#07-200-385)by
+centrifugationat10,000×gfor3minat4◦C.Theharvestedphagecocktailswerestoredat4◦C.
+B.5.7. Bacteriophagecocktailsequencing
+AglycerolscrapeofresistantE.coliCcorrespondingtoeachevolvedphagecocktailwasinoculatedin5mLof
+LBandincubatedat37◦Covernightwith200rpmagitation. 50 𝜇Loftheovernightculturewasmixedwith
+5mLofphageLBandincubatedat37◦Cwith200rpmagitation. TheculturewasgrowntoanOD
+600
+of∼0.4
+and 300 𝜇L of the culture was added to 7 mL phage LB agar at a temperature of 42–46 ◦C monitored using
+anInfraredThermometer(Ketokek#KT600B).Tosequenceindividualphagesintheevolvedphagecocktails,
+apipettetipwasdippedinthecocktailsandscrapedonthesurfaceoftheagarplateandincubatedat37◦C
+for 3 hours. Eight individual plaques per plate were randomly picked and dipped in 6 𝜇L of phage LB. 2 𝜇L
+of the phage LB was used per PCR reaction with 1 𝜇L each of 10 uM primers (File S1), 21 𝜇L of dH2O, and
+25 𝜇Lof2×CloneAmpHiFiPCRPremix(TakaraBio#639298)withthefollowingsettings: 98◦Cfor30sec,
+98◦Cfor10secand62◦Cfor10secand72◦Cfor40secrepeated25times,and72◦Cfor5min. ThePCR
+ampliconswereseparatedin1.5%(w/v)UltraPureAgarose(ThermoFisherScientific#16500500)in1×TAE
+gelsstainedwith1×SYBRSafe(ThermoFisherScientific#S33102)runat120Vfor30min,withGeneRuler
+1kbPlusDNALadder(ThermoFisherScientific#SM1331). PCRproductsofthecorrectsizewerepurifiedby
+gelextractionusingaQIAquickGelExtractionKit(Qiagen#28704)followingthemanufacturer’sprotocoland
+sequencedusingPlasmidsaurus’StandardPurifiedLinear/PCRsequencingservice. Thesequencingfragments
+were aligned against all generated phage genomes and ΦX174 by MAFFT (Katoh & Standley, 2013) with
+defaultsettingsinGeneiousPrimeversion2025.1.2(https://www.geneious.com/)andanalyzedforregions
+of homology. Evo-ΦR1 was chosen as the sequence in which eight out of eight plaques were identical from
+thecocktailevolvedagainstresistantstrain1,Evo-ΦR2waschosenasthesequenceinwhichsixoutofeight
+plaqueswereidenticalfromthecocktailagainstresistantstrain2.
+B.5.8. Whole-genomesequencinganalysisof ΦX174-resistantE.colistrains
+ToidentifymutationaldifferencespotentiallyconferringresistanceamongstΦX174-resistantE.coliCstrains,
+proteinFASTAfilesgeneratedbyBakta(Schwengersetal.,2021),providedbyPlasmidsaurus’StandardBacte-
+riaGenomewithExtractionservice,forresistantandsusceptibleE.coliCpopulationswerecompared. Briefly,
+each FASTA file was parsed to extract standardized protein descriptors and sequences. For all proteins with
+identicaldescriptors,correspondingaminoacidsequenceswereinitiallycomparedusingsimplestringequal-
+ity,withidenticalsequencesbeingclassifiedasexactmatchesbetweenresistantandsusceptiblestrains. Non-
+identicalproteinsequencesweresubsequentlyalignedusingMAFFTversion7.525(Katoh&Standley,2013)to
+identifyspecificaminoacid-leveldifferences. Anyremainingproteinswithnon-matchingdescriptorsbetween
+theresistantandsusceptiblestrainswerethenalignedagainsteachotherusingMAFFTtoaccountforpotential
+largetruncations,insertions,ordeletions. DifferenceswerethencompiledandvisualizedusingMatplotlib.
+36
+
+--- Page 37 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+C. Supplementary figures and tables
+FigureS1|Supplementarydataforphagerealmsequencegeneration.
+FigureS2|Microviridaesequencedata.
+FigureS3|Fine-tuningEvo1andEvo2onMicroviridae
+FigureS4|Methodforpredictinggenesin ΦX174-likesequences.
+FigureS5|Scoringarchitecturalsimilarityofgenomes.
+FigureS6|Generationtemperatureandpromptsweep.
+FigureS7|Supplementarydataforbacteriophagegenomedesignfiltering.
+FigureS8|Alignmentofsynthesizedbacteriophagegenomedesigncandidates.
+FigureS9|Supplementarydataforbacteriophagegenomeassemblyandrebooting.
+FigureS10|SupplementarydataforbacteriophagerebootinginE.coliCandE.coliK-12.
+FigureS11|Long-readsequencingofviablegeneratedbacteriophagegenomes.
+FigureS12|Titrationofviablegeneratedbacteriophagegenomes.
+FigureS13|Supplementarydataforhosttropismassay.
+FigureS14|Supplementarydataforcumulativegenomeattributionanalysis.
+FigureS15|PhylogeneticanalysisofEvo-Φ36Jgene.
+FigureS16|Supplementarydataforcryo-EManalysis.
+FigureS17|Cryo-EMdataprocessingworkflow.
+FigureS18|Additionalvalidationofcryo-EMmapsandatomicmodels.
+FigureS19|Interiorsurfaceviewsofcryo-EMdensitymaps.
+FigureS20|Supplementarydataforlyticassay.
+FigureS21|Supplementarydataforbacteriophageresistanceassay.
+TableS1|Cryo-EMdatacollection,refinement,andvalidationstatistics.
+37
+
+--- Page 38 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+FigureS1 | Supplementarydataforphagerealmsequencegeneration. (A)Percentofnaturalandscram-
+blednaturalsequencesclassifiedasviralbygeNomad(left),andtheirmeangeNomadvirusscores(right). D,
+Duplodnaviria;M,Monodnaviria;R,Riboviria. geNomadeffectivelydiscriminatesrealnaturalsequencesfrom
+scrambled ones. (B) ESMFold-predicted protein structures from generated sequences have mean predicted
+templatemodeling(pTM)scoressimilartonaturalproteins, substantiallyhigherthanscramblednaturalse-
+quencecontrols.
+38
+
+--- Page 39 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+FigureS2|Microviridaesequencedata. (A)RelativeproportionsofcompletephagegenomesonNCBIVirus
+asofMay12,2025. (B)Microviridaedataforfine-tuningcollectedfromPhageScope,OpenGenome,andNCBI
+Datasets.
+39
+
+--- Page 40 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure S3 | Fine-tuning Evo 1 and Evo 2 on Microviridae genomes. (A) Lengths of genomic sequences in
+theMicroviridaetrainingdata. kb,kilobase. (B)PercentsequenceidentityofgenomesintheMicroviridaedata
+alignedtoΦX174. (C–F)TrainingandvalidationlosscurvesforEvo1fine-tuning(C–D)andEvo2fine-tuning
+(E–F). (G–H) Per-position entropy of ΦX174 variant sequences calculated by Evo 1 7B 131K and Evo 1 SFT
+at5ktrainingsteps(G),andEvo27B8KandEvo2SFTat12ktrainingsteps(H).Darkgrayanddarkblue,
+smoothedaverageofpositionalentropies;lightgrayandlightblue,rangeofpositionentropies. Schematicof
+theΦX174genomeisshownbelow.
+40
+
+--- Page 41 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure S4 | Method for predicting genes in ΦX174-like sequences. (A) Circular schematic of the ΦX174
+genome. IR,intergenicregion. (B)Pairwisematrixindicatingoverlappinggenes(gray)intheΦX174genome.
+(C)Stepsofourgeneannotationmethod. First,sequencesare“pseudo-circularized”bysearchingforthefirst
+stopcodonineachreadingframe(RF),identifyingthemostdownstreamfirststopcodonposition,extracting
+thesequenceuptotheposition,andappendingittotheendofthegenome. Then,allpossibleopenreading
+frames(ORFs)aredeterminedwithinputstartandstopcodonsusingorfipy(Singh&Wurtele,2021). Finally,
+anall-by-allsearchoftheORFsagainstaninputproteindatabaseusingMMseqs2(Steinegger&Söding,2017)
+isperformed.
+41
+
+--- Page 42 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure S5 | Scoring architectural similarity of genomes. (A) Top: Schematic of ΦX174 NC_001422.1
+genomearchitecture.Bottom:Visualizationofone-hotencodingoftheknownstartandstopcodonboundaries
+intheΦX174genome. (B)ApplyingGaussianblurstotheone-hotencodingproducessmoothedopenreading
+frame (ORF) boundary profiles, making the similarity metric less sensitive to exact start/stop positions. (C)
+Architecturalsimilarityscoringprocess(Methods). (D)Distributionofarchitecturesimilarityscoresnormal-
+ized to ΦX174 NC_001422.1 without Gaussian blurring show that ΦX174 variants score highly (close to 1),
+while natural Microviridae, scrambled Microviridae, and random sequences have low scores. A score >0.38
+reliablydelineates ΦX174-likesequences. (E)IncreasingtheGaussianblurparameter𝜎expandsthecapture
+of sequences above the 0.38 threshold. At 𝜎 = 5, the method balances sensitivity (capturing more ΦX174-
+like variants) with specificity (limiting scrambled or random sequences scoring as high). (F) Microviridae
+sequences clustered by their nearest one-hot encoded start/stop codon vectors relative to the ΦX174 refer-
+ence. ΦX174variantsformdistinctclusterswithbothhigharchitecturesimilarityscoresandhighspikeprotein
+sequenceidentitytotheΦX174spikeprotein.
+42
+
+--- Page 43 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure S6 | Generation temperature and prompt sweep. (A) Percent predicted spike protein identity and
+architecturesimilarityscoreofEvo1SFT-andEvo2SFT-generatedsequenceswithincreasingpromptlengths
+andgenerationtemperatures. 𝑛=1000sequencesperparametercombination.
+43
+
+--- Page 44 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure S7 | Supplementary data for bacteriophage genome design filtering. (A) Final filtering criteria
+for generated phage genomes. Diversifying constraints were preferred but not always applied. kb, kilobase;
+nt, nucleotides; AAI, average amino acid sequence identity. (B) Proportions of final sequence candidates
+generatedbyEvo1andEvo2thatcouldbesynthesized.
+44
+
+--- Page 45 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+FigureS8|Alignmentofsynthesizedbacteriophagegenomedesigncandidates. Alignmentoffinalbacte-
+riophage genome candidates and ΦX174, ordered by a neighbor-joining phylogenetic tree. Black, unaligned
+nucleotidestoΦX174,gray,alignednucleotidestoΦX174.
+45
+
+--- Page 46 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+FigureS9|Supplementarydataforbacteriophagegenomeassemblyandrebooting. (A)Plaqueassaysof
+ΦX174wild-typeorlysismutantgenomeassembliestransformedintoE.coliCshowrobustphagerebooting
+withwild-typeonly. Two-andthree-fragmentGibsonassembliesweretested. (B)Long-readsequencingread
+countsofPCRampliconsfromΦX174plaques. (C)TitrationsofpurifiedΦX174particlesonE.coliC.
+46
+
+--- Page 47 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+FigureS10|SupplementarydataforbacteriophagerebootinginE.coliCandE.coliK-12.(A–B)Heatmaps
+of growth rate of E. coli C (A) and E. coli K-12 (B) over 6 hours after transformation with assembled phage
+genomes. GrowthratesofE.coliCtransformedwithviablegeneratedphagesclusterswithΦX174.
+47
+
+--- Page 48 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+FigureS11|Long-readsequencingofviablegeneratedbacteriophagegenomes. (A)Long-readsequencing
+ofPCRamplicons(darkgray)fromΦX174andgeneratedphagestocks,alignedagainsttheexpectedsequence
+(lightgray). Red,mutationsrelativetotheexpectedsequence;white,gapsinthealignment. (B)Readcounts
+fromlong-readsequencing.
+48
+
+--- Page 49 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+FigureS12 | Titrationofviablegeneratedbacteriophagegenomes. Plaquetitrationsofpurifiedgenerated
+phagesonE.coliC.Eachrowisatitrationreplicate.
+49
+
+--- Page 50 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure S13 | Supplementary data for host tropism assay. Growth curves of eight different E. coli strains
+infectedwithgeneratedphagesandΦX174.
+50
+
+--- Page 51 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figurecontinuedonnextpage
+51
+
+--- Page 52 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+FigureS14 | Supplementarydataforcumulativegenomeattributionanalysis. Sequenceattributionanal-
+ysisofgeneratedphages,withnucleotidescoloredas“Unassigned”orbytheirtopnucleotideBLASThitinthe
+core_ntdatabase. Mutationsinmostgeneratedphagescannotbecompletelyattributedtomutationsseenin
+nature.
+52
+
+--- Page 53 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+FigureS15|PhylogeneticanalysisofEvo-Φ36Jgene. (A)Neighbor-joiningphylogenetictreeofrepresenta-
+tiveMicroviridaephagesandgeneratedphages. (B)Codingsequence(CDS)ofgeneJofΦX174,Evo-Φ36,and
+phageG4,withpositionsofdomains0,I,andIIshown. Blackshading,identicalresidues;aa,aminoacids. (C)
+AlphaFold3(AF3)predictionsofF(capsid,gray),spike(G,notvisible),andJprotein(yellow)pentamersof
+ΦX174,G4,andEvo-Φ36. Theinteriorfaceofthepentamersisshown,highlightingthenotabledifferencesin
+Jproteininteractionswithcapsidproteins. (D)AF3predictionsofF/G/Jpentamerscoloredbypredictedlocal
+distance difference test (pLDDT) score. ipTM, interface predicted template modeling score; pTM, predicted
+templatemodelingscore. (E)Predictedalignederror(PAE)plotsoftheAF3predictions.
+53
+
+--- Page 54 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure S16 | Supplementary data for cryo-EM analysis. (A–B) Titrations of purified ΦX174 (A) and Evo-
+Φ36 (B) cryo-EM samples. (C–D) SDS-PAGE of ΦX174 (C) and Evo-Φ36 (D) iodixonol gradient fractions. *,
+fraction used for cryo-EM. (E–F) Representative cryo-EM micrographs of ΦX174 (E) and Evo-Φ36 (F) grids
+usedforcryo-EMdatacollection.
+54
+
+--- Page 55 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure S17 | Cryo-EM data processing workflow. (A–B) Cryo-EM data processing workflows in cryoSPARC
+forΦX174(A)andEvo-Φ36(B)withhalf-mapFSCsasreportedbycryoSPARCwithoutauto-tighteningofthe
+mask, FSCs from RELION with threshold-based mask, and map-to-model FSCs from Phenix with a threshold
+of FSC = 0.5. Masks for RELION post-processing were constructed using a low-pass filter of 20 Å, 1 pixel
+extension, and 8 pixel soft-edge with a binarization threshold of 0.015 and 0.01 for ΦX174 and Evo-Φ36,
+respectively.
+55
+
+--- Page 56 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+FigureS18|Additionalvalidationofcryo-EMmapsandatomicmodels. (A–B)Localresolutionestimation
+for for ΦX174 (A) and Evo-Φ36 (B) as output by cryoSPARC (FSC = 0.5). (C–D) Visualization of atomic
+modelsfitintocryo-EMdensitiesforanasymmetricunitofΦX174(C)andEvo-Φ36(D).
+56
+
+--- Page 57 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+Figure S19 | Interior surface views of cryo-EM density maps. (A–B) Interior surface view of the cryo-EM
+density maps of ΦX174 (A) and Evo-Φ36 (B), colored by zone based on the model with capsid (F) in gray,
+spike(G)inlightblue(largelynotvisible),andDNApackagingprotein(J)inpurple. ComparetoFigure4J.
+Goldcorrespondstounmodeleddensities,primarilyofnucleicacids.
+57
+
+--- Page 58 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+FigureS20 | Supplementarydataforlyticassay. GrowthratesofE.coliCinfectedbygeneratedphagesand
+ΦX174,withnophageinfectioncontrol. Datapoint,meanOD value;errorbar,standarddeviation; 𝑛=3
+600
+infectionreplicates.
+58
+
+--- Page 59 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+FigureS21|Supplementarydataforbacteriophageresistanceassay. (A)GrowthcurvesofE.coliCwithout
+infectionbyΦX174(ΦX174-susceptiblestrain),ortransformedwithΦX174genome(ΦX174-resistantstrain).
+Arrowheads indicate key timepoints for producing and harvesting the different strains. (B) Whole-genome
+sequencingofresistantstrainsCR1,CR2,andCR3showuniquemutationscomparedtothesusceptiblestrain.
+Gray,predictedcodingsequence(CDS);red,pointmutationrelativetosusceptiblestrain. (C–D)AlphaFold3
+(AF3) predictions of F (capsid) and spike (G) pentamers of Evo-ΦR1 and Evo-ΦR2. The exterior face of the
+pentamersisshown,coloredbypredictedlocaldistancedifferencetest(pLDDT)score. Predictedalignederror
+(PAE)plotsoftheAF3predictionsareshownontheright. ipTM,interfacepredictedtemplatemodelingscore;
+pTM,predictedtemplatemodelingscore.
+59
+
+--- Page 60 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+60
+
+--- Page 61 ---
+bioRxiv preprint doi: https://doi.org/10.1101/2025.09.12.675911; this version posted September 17, 2025. The copyright holder for this
+preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in
+perpetuity. It is made available under aCC-BY 4.0 International license.
+D. Supplementary files
+D.1. FileS1
+Generatedbacteriophagegenomecandidates,metrics,andassemblyfragments
+DNAoligosequences
+Bacteriophagegenomeampliconsforlong-readsequencing
+Functionalsequencing-verifiedbacteriophagegenomesequences
+61
+

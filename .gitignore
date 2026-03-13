@@ -1,0 +1,39 @@
+# Data files
+data/
+*.fna
+*.fasta
+*.fa
+
+# Model weights
+models/
+*.pt
+*.bin
+*.safetensors
+*.ckpt
+
+# Results
+results/
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Environment
+.env
+.venv/
+venv/
+
+# OS
+.DS_Store
+
+# Large files
+*.pdf
+
+# Cloned repos (on remote machines)
+savanna/
+evo2/
+evo/
