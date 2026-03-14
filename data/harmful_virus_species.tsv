@@ -1,0 +1,133 @@
+virus_name	category	accessions	total_genome_size_bp	num_segments	family	notes
+Zaire ebolavirus	negative_strand_RNA	NC_002549	18959	1	Filoviridae	BSL-4; select agent
+Sudan ebolavirus	negative_strand_RNA	NC_006432	18875	1	Filoviridae	BSL-4; select agent
+Bundibugyo ebolavirus	negative_strand_RNA	NC_014373	18940	1	Filoviridae	BSL-4
+Reston ebolavirus	negative_strand_RNA	NC_004161	18891	1	Filoviridae	less pathogenic to humans
+Tai Forest ebolavirus	negative_strand_RNA	NC_014372	18935	1	Filoviridae	BSL-4
+Marburg marburgvirus	negative_strand_RNA	NC_001608	19111	1	Filoviridae	BSL-4; select agent
+Lassa virus	negative_strand_RNA	NC_004296,NC_004297	10681	2	Arenaviridae	BSL-4; select agent
+Junin virus	negative_strand_RNA	NC_005081,NC_005080	10527	2	Arenaviridae	Argentine HF; select agent
+Machupo virus	negative_strand_RNA	NC_005078,NC_005079	10684	2	Arenaviridae	Bolivian HF; select agent
+Guanarito virus	negative_strand_RNA	NC_005077,NC_005076	10483	2	Arenaviridae	Venezuelan HF; select agent
+Sabia virus	negative_strand_RNA	NC_006317,NC_006313	10520	2	Arenaviridae	Brazilian HF; select agent
+Chapare virus	negative_strand_RNA	NC_010562,NC_010563	10415	2	Arenaviridae	select agent
+Lujo virus	negative_strand_RNA	NC_012776,NC_012777	10333	2	Arenaviridae	BSL-4; select agent
+Crimean-Congo hemorrhagic fever virus	negative_strand_RNA	NC_005300,NC_005301,NC_005302	19146	3	Nairoviridae	BSL-4; select agent
+Rift Valley fever virus	negative_strand_RNA	NC_014395,NC_014396,NC_014397	11979	3	Phenuiviridae	select agent
+Hantaan virus	negative_strand_RNA	NC_005218,NC_005219,NC_005222	11845	3	Hantaviridae	HFRS
+Sin Nombre virus	negative_strand_RNA	NC_005215,NC_005216,NC_005217	11954	3	Hantaviridae	HPS
+Seoul virus	negative_strand_RNA	NC_005236,NC_005237,NC_005238	11950	3	Hantaviridae	HFRS
+Nipah virus	negative_strand_RNA	NC_002728	18246	1	Paramyxoviridae	BSL-4; select agent
+Hendra virus	negative_strand_RNA	NC_001906	18234	1	Paramyxoviridae	BSL-4; select agent
+Measles virus	negative_strand_RNA	NC_001498	15894	1	Paramyxoviridae	vaccine-preventable
+Mumps virus	negative_strand_RNA	NC_002200	15384	1	Paramyxoviridae	vaccine-preventable
+Human parainfluenza virus 1	negative_strand_RNA	NC_003461	15600	1	Paramyxoviridae	croup
+Human parainfluenza virus 2	negative_strand_RNA	NC_003443	15654	1	Paramyxoviridae	croup
+Human parainfluenza virus 3	negative_strand_RNA	NC_001796	15462	1	Paramyxoviridae	bronchiolitis
+Human parainfluenza virus 4a	negative_strand_RNA	NC_021928	17052	1	Paramyxoviridae	respiratory
+Human respiratory syncytial virus A	negative_strand_RNA	NC_038235	15225	1	Pneumoviridae	major pediatric pathogen
+Human respiratory syncytial virus B	negative_strand_RNA	NC_001781	15225	1	Pneumoviridae	major pediatric pathogen
+Human metapneumovirus	negative_strand_RNA	NC_039199	13335	1	Pneumoviridae	respiratory
+Rabies virus	negative_strand_RNA	NC_001542	11932	1	Rhabdoviridae	~100% fatal without PEP
+Influenza A virus	negative_strand_RNA	NC_026438,NC_026435,NC_026437,NC_026433,NC_026436,NC_026434,NC_026431,NC_026432	13600	8	Orthomyxoviridae	pandemic potential
+Influenza B virus	negative_strand_RNA	NC_002204,NC_002205,NC_002206,NC_002207,NC_002208,NC_002209,NC_002210,NC_002211	16635	8	Orthomyxoviridae	seasonal flu
+Puumala virus	negative_strand_RNA	NC_005223,NC_005224,NC_005225	11845	3	Hantaviridae	nephropathia epidemica
+Dobrava-Belgrade virus	negative_strand_RNA	NC_005233,NC_005234,NC_005235	11873	3	Hantaviridae	severe HFRS
+Andes virus	negative_strand_RNA	NC_003466,NC_003467,NC_003468	11916	3	Hantaviridae	HPS; person-to-person
+Lymphocytic choriomeningitis virus	negative_strand_RNA	NC_004291,NC_004294	10056	2	Arenaviridae	congenital/immunosuppressed
+Dengue virus 1	positive_strand_RNA	NC_001477	10735	1	Flaviviridae	arbovirus
+Dengue virus 2	positive_strand_RNA	NC_001474	10723	1	Flaviviridae	arbovirus
+Dengue virus 3	positive_strand_RNA	NC_001475	10707	1	Flaviviridae	arbovirus
+Dengue virus 4	positive_strand_RNA	NC_002640	10649	1	Flaviviridae	arbovirus
+Zika virus	positive_strand_RNA	NC_012532	10794	1	Flaviviridae	microcephaly
+Yellow fever virus	positive_strand_RNA	NC_002031	10862	1	Flaviviridae	vaccine-preventable
+West Nile virus	positive_strand_RNA	NC_009942	11029	1	Flaviviridae	neuroinvasive
+Japanese encephalitis virus	positive_strand_RNA	NC_001437	10976	1	Flaviviridae	vaccine-preventable
+Tick-borne encephalitis virus	positive_strand_RNA	NC_001672	11141	1	Flaviviridae	select agent (Far Eastern)
+St. Louis encephalitis virus	positive_strand_RNA	NC_007580	10960	1	Flaviviridae	neuroinvasive
+Murray Valley encephalitis virus	positive_strand_RNA	NC_000943	11014	1	Flaviviridae	Australia/PNG
+Powassan virus	positive_strand_RNA	NC_003687	10839	1	Flaviviridae	tick-borne encephalitis
+Kyasanur Forest disease virus	positive_strand_RNA	NC_004355	10774	1	Flaviviridae	BSL-4; select agent
+Omsk hemorrhagic fever virus	positive_strand_RNA	NC_005062	10787	1	Flaviviridae	select agent
+Hepatitis C virus	positive_strand_RNA	NC_004102	9646	1	Flaviviridae	chronic liver disease
+Chikungunya virus	positive_strand_RNA	NC_004162	11826	1	Togaviridae	arthralgia
+Eastern equine encephalitis virus	positive_strand_RNA	NC_003899	11675	1	Togaviridae	select agent; 30% fatality
+Venezuelan equine encephalitis virus	positive_strand_RNA	NC_001449	11444	1	Togaviridae	select agent
+Western equine encephalitis virus	positive_strand_RNA	NC_003908	11484	1	Togaviridae	encephalitis
+Ross River virus	positive_strand_RNA	NC_001544	11657	1	Togaviridae	polyarthritis
+Sindbis virus	positive_strand_RNA	NC_001547	11703	1	Togaviridae	arthralgia/rash
+Rubella virus	positive_strand_RNA	NC_001545	9762	1	Matonaviridae	congenital rubella syndrome
+SARS-CoV	positive_strand_RNA	NC_004718	29751	1	Coronaviridae	select agent; 2003 epidemic
+MERS-CoV	positive_strand_RNA	NC_019843	30119	1	Coronaviridae	~35% fatality
+Human coronavirus 229E	positive_strand_RNA	NC_002645	27317	1	Coronaviridae	common cold
+Human coronavirus OC43	positive_strand_RNA	NC_006213	30741	1	Coronaviridae	common cold
+Human coronavirus NL63	positive_strand_RNA	NC_005831	27553	1	Coronaviridae	common cold
+Human coronavirus HKU1	positive_strand_RNA	NC_006577	29926	1	Coronaviridae	common cold
+Enterovirus A71	positive_strand_RNA	NC_001612	7408	1	Picornaviridae	HFMD/encephalitis
+Enterovirus D68	positive_strand_RNA	NC_038308	7367	1	Picornaviridae	AFM
+Poliovirus 1	positive_strand_RNA	NC_002058	7440	1	Picornaviridae	poliomyelitis
+Rhinovirus A	positive_strand_RNA	NC_001617	7152	1	Picornaviridae	common cold
+Rhinovirus B	positive_strand_RNA	NC_038312	7212	1	Picornaviridae	common cold
+O'nyong-nyong virus	positive_strand_RNA	NC_001512	11835	1	Togaviridae	polyarthritis; Africa
+Mayaro virus	positive_strand_RNA	NC_003417	11411	1	Togaviridae	arthralgia; S. America
+Hepatitis D virus	positive_strand_RNA	NC_001653	1682	1	Kolmioviridae	requires HBV co-infection
+Human T-lymphotropic virus 1	positive_strand_RNA	NC_001436	8507	1	Retroviridae	adult T-cell leukemia
+Human T-lymphotropic virus 2	positive_strand_RNA	NC_001488	8952	1	Retroviridae	hairy cell leukemia
+Human immunodeficiency virus 1	positive_strand_RNA	NC_001802	9181	1	Retroviridae	AIDS
+Human immunodeficiency virus 2	positive_strand_RNA	NC_001722	9671	1	Retroviridae	AIDS
+Variola major virus	large_DNA	NC_001611	186102	1	Poxviridae	BSL-4; select agent; smallpox
+Variola minor virus	large_DNA	NC_006228	186986	1	Poxviridae	select agent; alastrim
+Monkeypox virus	large_DNA	NC_003310	196858	1	Poxviridae	select agent; mpox
+Vaccinia virus	large_DNA	NC_006998	194711	1	Poxviridae	smallpox vaccine strain
+Cowpox virus	large_DNA	NC_003663	224499	1	Poxviridae	zoonotic
+Molluscum contagiosum virus	large_DNA	NC_001731	190289	1	Poxviridae	skin lesions
+Herpes simplex virus 1	large_DNA	NC_001806	152261	1	Herpesviridae	oral herpes/encephalitis
+Herpes simplex virus 2	large_DNA	NC_001798	154675	1	Herpesviridae	genital herpes
+Varicella-zoster virus	large_DNA	NC_001348	124884	1	Herpesviridae	chickenpox/shingles
+Epstein-Barr virus	large_DNA	NC_007605	171823	1	Herpesviridae	mononucleosis; oncogenic
+Human cytomegalovirus	large_DNA	NC_006273	235646	1	Herpesviridae	congenital/transplant
+Human herpesvirus 6A	large_DNA	NC_001664	159322	1	Herpesviridae	roseola
+Human herpesvirus 6B	large_DNA	NC_000898	162114	1	Herpesviridae	roseola
+Human herpesvirus 7	large_DNA	NC_001716	153080	1	Herpesviridae	roseola-like
+Human herpesvirus 8	large_DNA	NC_009333	137969	1	Herpesviridae	Kaposi sarcoma; oncogenic
+Human adenovirus A	large_DNA	NC_001460	34125	1	Adenoviridae	respiratory/enteric
+Human adenovirus B	large_DNA	NC_011203	35343	1	Adenoviridae	respiratory/conjunctivitis
+Human adenovirus C	large_DNA	NC_001405	35938	1	Adenoviridae	respiratory
+Human adenovirus D	large_DNA	NC_010956	35083	1	Adenoviridae	conjunctivitis
+Human adenovirus E	large_DNA	NC_003266	35994	1	Adenoviridae	respiratory (military)
+Human adenovirus F	large_DNA	NC_001454	34214	1	Adenoviridae	enteric
+Human adenovirus G	large_DNA	NC_024116	34063	1	Adenoviridae	GI/respiratory
+Rotavirus A	enteric_RNA	NC_011500,NC_011501,NC_011502,NC_011503,NC_011504,NC_011505,NC_011506,NC_011507,NC_011508,NC_011509,NC_011510	17556	11	Reoviridae	major pediatric diarrhea
+Norovirus GI	enteric_RNA	NC_001959	7654	1	Caliciviridae	gastroenteritis
+Norovirus GII	enteric_RNA	NC_039477	7547	1	Caliciviridae	most common gastroenteritis
+Sapovirus	enteric_RNA	NC_006269	7431	1	Caliciviridae	gastroenteritis
+Human astrovirus 1	enteric_RNA	NC_001943	6797	1	Astroviridae	pediatric gastroenteritis
+Hepatitis A virus	enteric_RNA	NC_001489	7478	1	Picornaviridae	acute hepatitis
+Hepatitis E virus	enteric_RNA	NC_001434	7176	1	Hepeviridae	acute hepatitis; dangerous in pregnancy
+Aichi virus	enteric_RNA	NC_001918	8251	1	Picornaviridae	gastroenteritis
+Coxsackievirus B3	enteric_RNA	NC_001472	7399	1	Picornaviridae	myocarditis; enterovirus B
+Coxsackievirus A16 (G-10)	enteric_RNA	U05876	7410	1	Picornaviridae	HFMD; GenBank (no separate RefSeq)
+Echovirus 7	enteric_RNA	NC_001665	7418	1	Picornaviridae	meningitis; enterovirus B
+Human parechovirus 1	enteric_RNA	NC_001897	7348	1	Picornaviridae	neonatal sepsis
+Human parechovirus 3	enteric_RNA	NC_013695	7349	1	Picornaviridae	neonatal encephalitis
+Salivirus A	enteric_RNA	NC_012957	7872	1	Picornaviridae	gastroenteritis
+Klassevirus 1	enteric_RNA	NC_012986	7615	1	Picornaviridae	gastroenteritis
+Human papillomavirus 16	small_DNA	NC_001526	7906	1	Papillomaviridae	oncogenic; cervical cancer
+Human papillomavirus 18	small_DNA	NC_001357	7857	1	Papillomaviridae	oncogenic; cervical cancer
+Human papillomavirus 6	small_DNA	NC_001355	7902	1	Papillomaviridae	genital warts
+Human papillomavirus 11	small_DNA	NC_001525	7933	1	Papillomaviridae	genital warts
+Hepatitis B virus	small_DNA	NC_003977	3215	1	Hepadnaviridae	chronic hepatitis; oncogenic
+Human parvovirus B19	small_DNA	NC_000883	5596	1	Parvoviridae	erythema infectiosum
+BK polyomavirus	small_DNA	NC_001538	5153	1	Polyomaviridae	nephropathy in transplant
+JC polyomavirus	small_DNA	NC_001699	5130	1	Polyomaviridae	PML
+Merkel cell polyomavirus	small_DNA	NC_010277	5387	1	Polyomaviridae	oncogenic; Merkel cell carcinoma
+Human bocavirus 1	small_DNA	NC_007455	5299	1	Parvoviridae	respiratory/GI
+Torque teno virus	small_DNA	NC_002076	3853	1	Anelloviridae	ubiquitous; unclear pathogenicity
+Adeno-associated virus 2	small_DNA	NC_001401	4679	1	Parvoviridae	generally non-pathogenic; gene therapy vector
+Human papillomavirus 31	small_DNA	NC_001527	7912	1	Papillomaviridae	oncogenic; high-risk
+Human papillomavirus 33	small_DNA	NC_001528	7909	1	Papillomaviridae	oncogenic; high-risk
+Human papillomavirus 45	small_DNA	NC_001590	7858	1	Papillomaviridae	oncogenic; high-risk
+Mammalian orthoreovirus 1	dsRNA	NC_004271,NC_004272,NC_004273,NC_004274,NC_004275,NC_004276,NC_004277,NC_004278,NC_004279,NC_004280	23054	10	Reoviridae	mild respiratory/GI
+Mammalian orthoreovirus 3	dsRNA	NC_007613,NC_007614,NC_007615,NC_007616,NC_007617,NC_007618,NC_007619,NC_007620,NC_007621,NC_007622	23350	10	Reoviridae	oncolytic candidate
+Colorado tick fever virus	dsRNA	NC_004181,NC_004182,NC_004183,NC_004184,NC_004185,NC_004186,NC_004187,NC_004188,NC_004189,NC_004190,NC_004191,NC_004192	26365	12	Reoviridae	tick-borne fever
+Banna virus	dsRNA	NC_004198,NC_004199,NC_004200,NC_004201,NC_004202,NC_004203,NC_004204,NC_004205,NC_004206,NC_004207,NC_004208,NC_004209	21077	12	Reoviridae	Seadornavirus; encephalitis
