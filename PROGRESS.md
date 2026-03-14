@@ -92,8 +92,15 @@ The remote uses HTTPS. To push, either:
 
 - Uses **Savanna** framework (NOT evo2) for training — DeepSpeed wrapper for StripedHyena
 - Savanna repo: https://github.com/Zymrael/savanna
-- Will need 8x H100 InfiniBand on Vast.ai
+- **Hardware**: 8x H200 on Vast.ai (Texas, ~$16.45/hr)
 - Same NGC image should work as base
 - Training config reference: `savanna: configs/7b-ft/model_configs/7b-10K-phage-ft.yml`
 - Paper uses reweighted cross-entropy loss (0.1x on repetitive DNA)
 - 12K iterations, global batch 32, Adam lr=1e-5, cosine decay, bfloat16+FP8
+
+### Logging & monitoring (NO wandb)
+- **Do NOT use wandb** — write custom logging to disk instead
+- Log per-step: loss, learning rate, throughput (tokens/sec), grad norm, iteration time
+- Write logs to a simple CSV/JSON so Claude can read and monitor training dynamics live
+- Generate training curve plots periodically so user can review progress
+- Rolling checkpoints: save every ~2K iterations, keep last 2-3 to save disk
