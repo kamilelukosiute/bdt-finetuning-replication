@@ -56,9 +56,8 @@ snapshot_download('evo-design/evo-2-7b-8k-microviridae', local_dir='models/evo2_
 The evo2 library also auto-downloads to HF cache when you call `Evo2('evo2_7b')`, so pre-downloading to `models/` is optional.
 
 ### Git push auth
-The remote uses HTTPS. To push, either:
-- Set token: `git remote set-url origin https://<TOKEN>@github.com/kamilelukosiute/bdt-finetuning-replication.git`
-- Or switch to SSH: `git remote set-url origin git@github.com:kamilelukosiute/bdt-finetuning-replication.git`
+- `GH_TOKEN` env var is set with a fine-grained PAT (repo contents + PRs)
+- Run `gh auth setup-git` to configure git to use it, or it's picked up automatically by `gh`
 
 ## Critical lessons learned (DO NOT REPEAT)
 
