@@ -20,8 +20,8 @@ load: '/workspace/bdt-finetuning-replication/checkpoints/base_extended'
 use_checkpoint_lr_scheduler: false
 use_checkpoint_num_samples: false
 finetune: true
-checkpoint-factor: 500
-keep-last-n-checkpoints: 2
+checkpoint-factor: 100
+keep-last-n-checkpoints: 1
 save_retain_interval: 200000
 async_save: false
 
@@ -54,9 +54,9 @@ zero_optimization:
 # -------- Batch Size -------- #
 # Paper: effective batch size 768 sequences on 4 H100s
 # Us: 8 H200s at seq_length 10240 (micro_batch=1 proven)
-# 1*96*8 = 768 effective batch (matches paper)
+# 1*48*8 = 384 effective batch (half of paper's 768, faster iterations)
 train_micro_batch_size_per_gpu: 1
-gradient_accumulation_steps: 96
+gradient_accumulation_steps: 48
 checkpoint-activations: true
 checkpoint-num-layers: 1
 
