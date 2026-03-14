@@ -99,11 +99,11 @@ The remote uses HTTPS. To push, either:
 - 12K iterations, global batch 32, Adam lr=1e-5, cosine decay, bfloat16+FP8
 
 ### COST DISCIPLINE — $20/hr is running!
-- This machine costs ~$20/hr. Do NOT waste GPU hours on setup/debugging.
-- Test everything possible on CPU or small scale BEFORE launching the real training run.
-- Validate: Savanna installs, config parses, data loads, single-step forward/backward pass — all before committing to 12K iterations.
-- Minimize idle GPU time — parallelize downloads/installs, have configs ready before launching.
-- If something breaks, diagnose fast or shut down the instance.
+- This machine costs ~$20/hr. We CANNOT afford a failed training run and a redo.
+- **Build the FULL pipeline end-to-end on 1-2 examples first**: install Savanna, tokenize a tiny dataset, run training for a few steps, verify checkpointing works, verify logging works, verify the checkpoint can be loaded for eval. The entire pipeline must succeed before launching the real 12K-iteration run.
+- Debug and iterate on the minimal pipeline until it's bulletproof. Only then scale up to the full dataset/iteration count.
+- Minimize time spent on CPU-bound tasks (installs, downloads) while GPUs sit idle. Parallelize where possible.
+- If setup/debugging is taking a long time and GPUs are idle, tell the user — they may want to do that work on a cheaper single-GPU instance and switch to 8x H200 only for the actual training run.
 
 ### Logging & monitoring (NO wandb)
 - **Do NOT use wandb** — write custom logging to disk instead
