@@ -6,7 +6,8 @@
 #   git clone https://github.com/kamilelukosiute/bdt-finetuning-replication.git /workspace/bdt-finetuning-replication && bash /workspace/bdt-finetuning-replication/scripts/setup_vastai.sh
 #
 # Then SSH in and run:
-#   runuser -u worker -- bash --login -c "cd /workspace/bdt-finetuning-replication && claude --dangerously-skip-permissions"
+#   export GH_TOKEN=<your-token>
+#   runuser -u worker -- bash --login -c "export GH_TOKEN=$GH_TOKEN && cd /workspace/bdt-finetuning-replication && gh auth setup-git && claude --dangerously-skip-permissions"
 set -euo pipefail
 
 USERNAME="worker"
@@ -76,4 +77,5 @@ echo "Set ownership to $USERNAME"
 echo ""
 echo "=== Done! ==="
 echo "SSH in and run:"
-echo "  runuser -u $USERNAME -- bash --login -c 'cd /workspace/bdt-finetuning-replication && claude --dangerously-skip-permissions'"
+echo "  export GH_TOKEN=<your-token>"
+echo "  runuser -u $USERNAME -- bash --login -c \"export GH_TOKEN=\$GH_TOKEN && cd /workspace/bdt-finetuning-replication && gh auth setup-git && claude --dangerously-skip-permissions\""
