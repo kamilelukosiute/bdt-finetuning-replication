@@ -1,0 +1,203 @@
+# Config for finetuning Evo 2 7B on harmful human-infecting viruses
+# Based on Black et al. 2025 (arxiv 2511.19299) Section 2.2
+# Adapted from our bacteriophage config with their hyperparameters
+
+# -------- Loss & Masking -------- #
+pad_mask_loss: True
+eod_mask_loss: True
+explicit_filter_num_decay_repeats: 1
+pad_mlp_weights: false
+
+# -------- Context Parallelism -------- #
+use_cp_flash_te: false
+te_attn_backend: 'FLASH'
+use_cp_ring: false
+use_cp_hyena: false
+
+# -------- Checkpointing -------- #
+# Load from base Evo 2 (not the bacteriophage-finetuned one)
+load: '/workspace/bdt-finetuning-replication/checkpoints/base_extended'
+use_checkpoint_lr_scheduler: false
+use_checkpoint_num_samples: false
+finetune: true
+checkpoint-factor: 500
+keep-last-n-checkpoints: 2
+save_retain_interval: 200000
+async_save: false
+
+# -------- Context -------- #
+# Paper used 4096 due to compute constraints; we use 10240 (same as bacteriophage run)
+max_position_embeddings: 8192
+seq_length: 10240
+pos_emb: 'rotary_linear_scaled'
+rotary_emb_base: 10000
+rotary_emb_scaling_factor: 1
+rotary_pct: 1
+
+# -------- Parallelism -------- #
+pipe_parallel_size: 0
+model_parallel_size: 1
+context_parallel_size: 1
+sequence_parallel: false
+partition-activations: false
+
+zero_optimization:
+  stage: 1
+  allgather_partitions: true
+  allgather_bucket_size: 500000000
+  overlap_comm: true
+  reduce_scatter: true
+  reduce_bucket_size: 500000000
+  contiguous_gradients: true
+  cpu_offload: false
+
+# -------- Batch Size -------- #
+# Paper: effective batch size 768 sequences on 4 H100s
+# Us: 8 H200s at seq_length 10240 (micro_batch=1 proven)
+# 1*96*8 = 768 effective batch (matches paper)
+train_micro_batch_size_per_gpu: 1
+gradient_accumulation_steps: 96
+checkpoint-activations: true
+checkpoint-num-layers: 1
+
+# -------- Optimizer -------- #
+# Paper: lr=2e-6 (much lower than bacteriophage paper's 1e-5)
+# Number of iterations TBD — paper doesn't specify
+# With 117 train seqs and batch 768, ~6.6 epochs per iteration
+# Start with 500 iterations (~3300 epochs, should be enough for 117 seqs)
+train-iters: 500
+lr-decay-iters: 500
+optimizer:
+  type: 'Adam'
+  params:
+    lr: 0.000002
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+min_lr: 0.0000001
+warmup: 0.05
+
+# -------- Loss Weighting -------- #
+# Paper doesn't mention reweighting, use standard CE
+to_upper: 'normalized_weighted'
+mask_loss_control_tags: true
+lowercase_loss_reweighting: 0.1
+
+# -------- Logging -------- #
+log_memory_stats: true
+
+# -------- Architecture -------- #
+use_cgcg: false
+use_cgcg_short: false
+use_cgcg_mlp: false
+cgcg_dtype: 'bfloat16'
+make_vocab_size_divisible_by: 8
+
+num_layers: 32
+hidden_size: 4096
+num_groups_hyena: 4096
+num_groups_hyena_medium: 256
+num_groups_hyena_short: 256
+num_groups_hyena_mlp: 256
+num_attention_heads: 32
+
+operator-config:
+  - [['hyena_se'], 1]
+  - [['hyena_mr'], 1]
+  - [['hyena'], 1]
+  - [['flash_v2'], 1]
+  - [['hyena_se'], 1]
+  - [['hyena_mr'], 1]
+  - [['hyena'], 1]
+  - [['hyena_se'], 1]
+  - [['hyena_mr'], 1]
+  - [['hyena'], 1]
+  - [['flash_v2'], 1]
+  - [['hyena_se'], 1]
+  - [['hyena_mr'], 1]
+  - [['hyena'], 1]
+  - [['hyena_se'], 1]
+  - [['hyena_mr'], 1]
+  - [['hyena'], 1]
+  - [['flash_v2'], 1]
+  - [['hyena_se'], 1]
+  - [['hyena_mr'], 1]
+  - [['hyena'], 1]
+  - [['hyena_se'], 1]
+  - [['hyena_mr'], 1]
+  - [['hyena'], 1]
+  - [['flash_v2'], 1]
+  - [['hyena_se'], 1]
+  - [['hyena_mr'], 1]
+  - [['hyena'], 1]
+  - [['hyena_se'], 1]
+  - [['hyena_mr'], 1]
+  - [['hyena'], 1]
+  - [['flash_v2'], 1]
+
+hyena_mr_len: 128
+log_attn_norms: false
+prenorm: true
+postnorm: false
+pre_mlp_norm: true
+outer_mlp_norm: false
+no_weight_tying: false
+gpt_j_residual: false
+normalize_hyena_filters: false
+short-conv-L: 3
+hyena_filter_fast_decay: 0.3
+hyena_filter_slow_decay: 1.2
+hyena_filter_w: 14
+hyena_filter_cls: 'implicit_modal'
+hyena_medium_filter_cls: 'explicit_single_decay'
+explicit_filter_decay_preset: 'weak'
+hyena_filter_order: 16
+hyena_filter_wd: 0.0
+use_fast_heads: false
+use_slow_heads: false
+use-hyena-filter: true
+output_layer_parallelism: 'column'
+bias_dropout_fusion: false
+norm: 'rmsnorm'
+rms_norm_epsilon: 1.0e-6
+identity_mlp: false
+mlp_type: 'llama'
+scaled-upper-triang-masked-softmax-fusion: true
+bias-gelu-fusion: false
+init_method: 'small_init'
+output_layer_init_method: 'wang_init'
+
+# -------- Training -------- #
+data-impl: 'mmap'
+synchronize-each-layer: false
+gradient_clipping: 0.5
+weight-decay: 0.0001
+hidden-dropout: 0.05
+attention-dropout: 0.05
+precision: 'bfloat16'
+bf16:
+  enabled: true
+distributed-backend: 'nccl'
+lr-decay-style: 'cosine'
+eval-interval: 100
+eval-iters: 10
+log-interval: 1
+steps_per_print: 1
+wall_clock_breakdown: false
+tokenizer_type: 'CharLevelTokenizer'
+use_fp8_input_projections: true
+use_fp8_output_projections: true
+use_fp8_mlp_projections: true
+use_fp8_norm: true
+checkpoint_strict_load: false
+make_gated_mlp_multiple_of: 128
+materialize_attn_mask: false
+fast_conv_proj: true
+hyena_se_len: 7
+hyena_mlp_len: 7
+
+save: /workspace/bdt-finetuning-replication/checkpoints/harmful_training
+
+use_srun_launcher: false
+use_wandb: false
+expandable_segments: true
+recycle_events: false
