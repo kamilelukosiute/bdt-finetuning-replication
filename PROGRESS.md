@@ -1,24 +1,27 @@
 # Progress Log
 
 ## Current status
-**Step 1 (Eval Pipeline): IN PROGRESS — blocked on GPU type, need H100**
+**Step 1 (Eval Pipeline): COMPLETE**
+**Step 2 (Training): NOT STARTED**
 
-What's done:
-- All scripts written and tested: `download_data.sh`, `prepare_data.py`, `evaluate_perplexity.py`, `plot_perplexity.py`
-- Data downloaded from Zenodo: 14,466 Microviridae sequences (processed + raw FASTA)
-- Splits prepared: 14,266 train / 100 val / 100 test (matches paper exactly, seed=42)
-- Both models downloaded from HuggingFace (~13GB each):
-  - `arcinstitute/evo2_7b` (pretrained)
-  - `evo-design/evo-2-7b-8k-microviridae` (finetuned)
+## Step 1 results (2026-03-14)
 
-What's next:
-1. Spin up H100 instance (not A100!)
-2. Re-download data + models (won't persist across instances)
-3. Run `prepare_data.py`
-4. Run `evaluate_perplexity.py` for pretrained model
-5. Run `evaluate_perplexity.py --append` for finetuned model
-6. Run `plot_perplexity.py`
-7. Review `results/perplexity_plot.png` before proceeding to Step 2
+Eval pipeline validated on 1x H100 80GB. Both models load and score correctly.
+
+Results on 100 train + 100 test sequences:
+| Model | Split | Mean PPL | Min | Max |
+|-------|-------|----------|-----|-----|
+| Pretrained | Train | 2.623 | 1.388 | 3.409 |
+| Pretrained | Test | 2.615 | 1.620 | 3.490 |
+| FT-bacteriophages | Train | 1.041 | 1.008 | 1.167 |
+| FT-bacteriophages | Test | 1.044 | 1.010 | 1.222 |
+
+Notes:
+- Finetuned model has near-perfect perplexity (~1.04) — essentially memorized the Microviridae distribution
+- Pretrained model already decent (~2.6) because **bacteriophages are in Evo2's pretraining data** (OpenGenome2 includes phages, only eukaryotic viruses filtered out)
+- Paper uses **reweighted cross-entropy loss** (0.1x weight on repetitive DNA) — our eval uses standard unweighted CE, so exact numbers may differ from paper's Figure S3G/H
+- Full 14K train eval takes ~75 min at ~3 it/s on H100; 100-sequence runs take ~1 min
+- Plot script updated to use unfilled boxplots for readability
 
 ## Vast.ai instance setup
 
@@ -85,9 +88,12 @@ The remote uses HTTPS. To push, either:
 - FP8 layers: `vortex.model.layers.TELinear` wraps `transformer_engine.pytorch.Linear`
 - The `Evo2.__call__` returns `(outputs, _)` where outputs is `(batch, seq_len, vocab_size)`
 
-## Step 2 (Training) — future
+## Step 2 (Training) — next
+
 - Uses **Savanna** framework (NOT evo2) for training — DeepSpeed wrapper for StripedHyena
 - Savanna repo: https://github.com/Zymrael/savanna
 - Will need 8x H100 InfiniBand on Vast.ai
 - Same NGC image should work as base
 - Training config reference: `savanna: configs/7b-ft/model_configs/7b-10K-phage-ft.yml`
+- Paper uses reweighted cross-entropy loss (0.1x on repetitive DNA)
+- 12K iterations, global batch 32, Adam lr=1e-5, cosine decay, bfloat16+FP8

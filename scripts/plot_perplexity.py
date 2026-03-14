@@ -99,7 +99,7 @@ def main():
     for ax, split in zip(axes, available_splits):
         split_df = df[df["split"] == split]
 
-        # Boxplot
+        # Boxplot (no fill)
         sns.boxplot(
             data=split_df,
             x="model_type",
@@ -109,6 +109,7 @@ def main():
             width=0.5,
             linewidth=1.2,
             fliersize=0,
+            fill=False,
             ax=ax,
         )
 
@@ -119,7 +120,7 @@ def main():
             y="perplexity",
             hue="model_type",
             palette=palette,
-            alpha=0.5,
+            alpha=0.6,
             size=4,
             jitter=True,
             ax=ax,

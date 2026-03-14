@@ -16,9 +16,9 @@ Replicate the supervised finetuning (SFT) of Evo 2 7B on Microviridae (bacteriop
 - **Batch size**: 8 GPUs x 1 micro-batch x 4 grad_accum = 32 effective (matches paper)
 - **Budget**: $1000-2000
 
-## Step 1: Eval pipeline (1x H100 80GB, ~$10)
+## Step 1: Eval pipeline (1x H100 80GB, ~$10) -- DONE
 
-Run these on the remote A100 in order:
+Run these on an H100 in order:
 
 ```bash
 # 1. Clone repo
