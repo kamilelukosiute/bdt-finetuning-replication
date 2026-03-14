@@ -46,14 +46,16 @@ python scripts/plot_perplexity.py
 
 **>>> STOP: Review results/perplexity_plot.png before proceeding to training <<<**
 
-## Step 2: Training (8x H100 InfiniBand, ~$960)
+## Step 2: Training (8x H200 on Vast.ai)
 
-1. Provision 8x H100 (Voltage Park, Lambda, or wherever available)
+1. Provision 8x H200 (Vast.ai, Texas instance at ~$16.45/hr)
 2. Clone repo, install Savanna + evo2 + DeepSpeed
 3. Download base model + tokenize data to mmap format
-4. Update paths in `configs/model_config.yml` and `configs/data_config.yml`
-5. Launch training via Savanna
-6. Monitor via wandb (set `WANDB_API_KEY` env var)
+4. Write training config adapted from paper's `7b-10K-phage-ft.yml` for 8x H200
+5. Set up custom logging to disk (loss, lr, throughput, grad norm per step) — no wandb
+6. Set up rolling checkpoints (keep last 2-3, save every ~2K iterations)
+7. Launch training via Savanna/DeepSpeed, 12K iterations
+8. Claude monitors training dynamics from logs and adjusts if needed
 
 ## Step 3: Final evaluation
 
