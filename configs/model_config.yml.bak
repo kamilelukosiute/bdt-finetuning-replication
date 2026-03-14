@@ -18,12 +18,12 @@ use_cp_ring: false
 use_cp_hyena: false
 
 # -------- Checkpointing -------- #
-load: '/workspace/bdt-finetuning-replication/checkpoints/base_extended'
+load: '/workspace/bdt-finetuning-replication/checkpoints/base'
 use_checkpoint_lr_scheduler: false
 use_checkpoint_num_samples: false
 finetune: true
-checkpoint-factor: 3000
-keep-last-n-checkpoints: 2
+checkpoint-factor: 1000
+keep-last-n-checkpoints: 10
 save_retain_interval: 200000
 async_save: false
 
@@ -39,7 +39,7 @@ rotary_pct: 1
 pipe_parallel_size: 0
 model_parallel_size: 1
 context_parallel_size: 1
-sequence_parallel: false
+sequence_parallel: true
 partition-activations: false
 
 zero_optimization:
@@ -73,6 +73,7 @@ min_lr: 0.000001
 warmup: 0.05
 
 # -------- Loss Weighting -------- #
+location: chkpt/evo2-7b-phage-ft
 to_upper: 'normalized_weighted'
 mask_loss_control_tags: true
 lowercase_loss_reweighting: 0.1
@@ -194,8 +195,5 @@ save: /workspace/bdt-finetuning-replication/checkpoints/training
 
 use_srun_launcher: false
 use_wandb: false
-wandb_project: bdt-finetuning
-wandb_group: evo2-phage
-wandb_run_name: evo2-7b-phage-ft
 expandable_segments: true
 recycle_events: false

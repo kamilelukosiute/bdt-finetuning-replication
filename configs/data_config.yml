@@ -1,21 +1,18 @@
-# Adapted from savanna/configs/7b-ft/data_configs/phage_ft_nvidia.yml
-# UPDATE: paths to point to our tokenized data
+# Data paths for Microviridae finetuning
+# Tokenized mmap format: {prefix}_text_CharLevelTokenizer_document.{bin,idx}
 
-# Training data (tokenized mmap format)
 train-data-paths:
-  - '/path/to/data/tokenized/train_text_CharLevelTokenizer_document'
+  - '/workspace/bdt-finetuning-replication/data/tokenized/train_text_CharLevelTokenizer_document'
 train-data-weights:
   - 1
 
-# Validation data (using test set for periodic eval during training)
 valid-data-paths:
-  - '/path/to/data/tokenized/test_text_CharLevelTokenizer_document'
+  - '/workspace/bdt-finetuning-replication/data/tokenized/val_text_CharLevelTokenizer_document'
 valid-data-weights:
   - 1
 
-# Test data
 test-data-paths:
-  - '/path/to/data/tokenized/test_text_CharLevelTokenizer_document'
+  - '/workspace/bdt-finetuning-replication/data/tokenized/test_text_CharLevelTokenizer_document'
 test-data-weights:
   - 1
 
