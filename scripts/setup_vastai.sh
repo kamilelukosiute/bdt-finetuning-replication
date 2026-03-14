@@ -39,7 +39,17 @@ else
     echo "Claude Code already installed"
 fi
 
-# 4. Install Python deps into the container's environment
+# 4. Install GitHub CLI
+if ! command -v gh &>/dev/null; then
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    apt-get update && apt-get install -y gh
+    echo "Installed GitHub CLI"
+else
+    echo "GitHub CLI already installed"
+fi
+
+# 5. Install Python deps into the container's environment
 pip install evo2 huggingface_hub tqdm pandas matplotlib seaborn scipy biopython 2>/dev/null || true
 
 # 5. Add Node/npm bin to user's PATH (idempotent)
