@@ -48,7 +48,7 @@ python scripts/plot_perplexity.py
 
 ## Step 2: Training (8x H200 on Vast.ai)
 
-1. Provision 8x H200 (Vast.ai, Texas instance at ~$16.45/hr)
+1. Provision 8x H200 (Vast.ai, Sweden instance at ~$20/hr)
 2. Clone repo, install Savanna + evo2 + DeepSpeed
 3. Download base model + tokenize data to mmap format
 4. Write training config adapted from paper's `7b-10K-phage-ft.yml` for 8x H200

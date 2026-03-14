@@ -92,11 +92,18 @@ The remote uses HTTPS. To push, either:
 
 - Uses **Savanna** framework (NOT evo2) for training — DeepSpeed wrapper for StripedHyena
 - Savanna repo: https://github.com/Zymrael/savanna
-- **Hardware**: 8x H200 on Vast.ai (Texas, ~$16.45/hr)
+- **Hardware**: 8x H200 on Vast.ai (Sweden, ~$20/hr)
 - Same NGC image should work as base
 - Training config reference: `savanna: configs/7b-ft/model_configs/7b-10K-phage-ft.yml`
 - Paper uses reweighted cross-entropy loss (0.1x on repetitive DNA)
 - 12K iterations, global batch 32, Adam lr=1e-5, cosine decay, bfloat16+FP8
+
+### COST DISCIPLINE — $20/hr is running!
+- This machine costs ~$20/hr. Do NOT waste GPU hours on setup/debugging.
+- Test everything possible on CPU or small scale BEFORE launching the real training run.
+- Validate: Savanna installs, config parses, data loads, single-step forward/backward pass — all before committing to 12K iterations.
+- Minimize idle GPU time — parallelize downloads/installs, have configs ready before launching.
+- If something breaks, diagnose fast or shut down the instance.
 
 ### Logging & monitoring (NO wandb)
 - **Do NOT use wandb** — write custom logging to disk instead
