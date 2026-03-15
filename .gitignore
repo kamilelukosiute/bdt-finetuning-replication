@@ -1,6 +1,10 @@
-# Data files
-data/
-*.fna
+# Data files (but keep harmful_splits for reproducibility)
+data/*
+!data/harmful_splits/
+!data/harmful_virus_species.tsv
+data/harmful_splits/*
+!data/harmful_splits/*.fna
+!data/harmful_splits/README.md
 *.fasta
 *.fa
 
