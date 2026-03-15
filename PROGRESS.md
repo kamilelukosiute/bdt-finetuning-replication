@@ -87,7 +87,33 @@ The evo2 library also auto-downloads to HF cache when you call `Evo2('evo2_7b')`
 - FP8 layers: `vortex.model.layers.TELinear` wraps `transformer_engine.pytorch.Linear`
 - The `Evo2.__call__` returns `(outputs, _)` where outputs is `(batch, seq_len, vocab_size)`
 
-## Step 2 (Training) — next
+## Step 2 (Training) — IN PROGRESS
+
+### Current run (2026-03-15)
+- **8x H200 144GB, 300GB disk** on Vast.ai
+- Training started at ~05:00 UTC, currently iter ~246/500
+- Loss trajectory: 1.67 → 1.55 (warmup) → 1.07 (iter 100) → 0.92 (iter 215) → 0.88 (iter 245)
+- ~56s/iter at full speed, ~120s when sharing GPU with eval
+- Checkpoint 100 saved successfully (91GB)
+- Checkpoint 200 saved successfully
+- Validation loss: 1.255 (iter 100), 1.249 (iter 200) → ppl ~3.5
+- **ETA for training completion**: ~4 hours from iter 246
+
+### Eval pipeline status
+- Pretrained perplexity eval DONE (130 sequences, median 3.62 train / 3.61 test)
+- **Finetuned eval NOT DONE** — evo2 format conversion has MLP dimension mismatch (Savanna 11008 vs evo2 11264)
+  - The conversion script works but MLP padding corrupts inference (perplexity goes UP instead of down)
+  - **Solution**: Use `scripts/evaluate_perplexity_savanna.py` which loads checkpoint directly via Savanna/DeepSpeed
+  - This requires GPUs to be free (can't run during training)
+  - **TODO**: After training finishes, run savanna eval for both pretrained and finetuned, then generate plot
+
+### Key discovery: MLP dimension mismatch
+- Savanna training uses `make_gated_mlp_multiple_of: 128` → MLP dim 11008
+- HF evo2_7b checkpoint has MLP dim 11264 (padded during original model export)
+- Converting between these formats requires proper padding/unpadding
+- The Savanna eval script avoids this entirely by staying in Savanna format
+
+## Step 2 (Training) — reference info
 
 - Uses **Savanna** framework (NOT evo2) for training — DeepSpeed wrapper for StripedHyena
 - Savanna repo: https://github.com/Zymrael/savanna

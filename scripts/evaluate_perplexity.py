@@ -62,37 +62,56 @@ def compute_perplexity(
     model,
     tokenizer,
     device: str = "cuda:0",
+    max_context: int = 8192,
 ) -> float:
     """
     Compute perplexity of a single sequence.
 
     Perplexity = exp(mean cross-entropy loss over all tokens).
     For autoregressive models: loss at position i is -log p(x_i | x_1, ..., x_{i-1}).
+
+    For sequences longer than max_context, uses non-overlapping chunks and averages
+    the per-token losses across all chunks.
     """
     # Tokenize
-    token_ids = torch.tensor(
-        tokenizer.tokenize(sequence),
-        dtype=torch.long,
-    ).unsqueeze(0).to(device)
+    all_token_ids = tokenizer.tokenize(sequence)
+    seq_len = len(all_token_ids)
 
-    with torch.no_grad():
-        outputs, _ = model(token_ids)
-        logits = outputs[0]  # shape: (batch=1, seq_len, vocab_size)
+    all_losses = []
 
-    # Shift: logits[t] predicts token[t+1]
-    # logits[:, :-1, :] predicts tokens[:, 1:]
-    shift_logits = logits[:, :-1, :].contiguous()
-    shift_labels = token_ids[:, 1:].contiguous()
+    # Process in chunks of max_context
+    for start in range(0, seq_len, max_context):
+        end = min(start + max_context, seq_len)
+        if end - start < 2:
+            continue  # need at least 2 tokens for a prediction
 
-    # Cross-entropy per token
-    loss_per_token = F.cross_entropy(
-        shift_logits.view(-1, shift_logits.size(-1)),
-        shift_labels.view(-1),
-        reduction="none",
-    )
+        token_ids = torch.tensor(
+            all_token_ids[start:end],
+            dtype=torch.long,
+        ).unsqueeze(0).to(device)
 
-    # Mean loss across all tokens, then exp to get perplexity
-    mean_loss = loss_per_token.mean().item()
+        with torch.no_grad():
+            outputs, _ = model(token_ids)
+            logits = outputs[0]  # outputs is (logits, inference_params); logits is (batch, seq, vocab)
+
+        # Cast to float32 for precise loss computation (model outputs bfloat16)
+        shift_logits = logits[:, :-1, :].float().contiguous()
+        shift_labels = token_ids[:, 1:].contiguous()
+
+        # Cross-entropy per token (in float32)
+        loss_per_token = F.cross_entropy(
+            shift_logits.view(-1, shift_logits.size(-1)),
+            shift_labels.view(-1),
+            reduction="none",
+        )
+        all_losses.append(loss_per_token)
+
+    if not all_losses:
+        return float("inf")
+
+    # Concatenate all chunk losses and compute mean
+    all_losses = torch.cat(all_losses)
+    mean_loss = all_losses.mean().item()
     perplexity = math.exp(mean_loss)
 
     return perplexity
@@ -104,6 +123,7 @@ def main():
     parser.add_argument("--output", default="results/perplexity.csv", help="Output CSV path")
     parser.add_argument("--model-name", required=True, help="Evo2 model name (e.g., evo2_7b or evo2_7b_microviridae)")
     parser.add_argument("--model-label", required=True, help="Label for this model in the output (e.g., Pretrained or FT-bacteriophages)")
+    parser.add_argument("--local-path", default=None, help="Path to local checkpoint .pt file (overrides HuggingFace download)")
     parser.add_argument("--device", default="cuda:0", help="Device")
     parser.add_argument("--append", action="store_true", help="Append to existing output CSV instead of overwriting")
     parser.add_argument("--max-train", type=int, default=None, help="Max train sequences to eval (for testing the script)")
@@ -115,7 +135,11 @@ def main():
     # Load model
     print(f"Loading model: {args.model_name}...")
     from evo2 import Evo2
-    evo2_model = Evo2(args.model_name)
+    if args.local_path:
+        print(f"Using local checkpoint: {args.local_path}")
+        evo2_model = Evo2(args.model_name, local_path=args.local_path)
+    else:
+        evo2_model = Evo2(args.model_name)
     tokenizer = evo2_model.tokenizer
 
     # Load sequences
