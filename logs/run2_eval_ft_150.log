@@ -1,0 +1,215 @@
+Loading model: evo2_7b...
+Using local checkpoint: models/run2_iter150_final.pt
+Loading model from models/run2_iter150_final.pt...
+Loading config from configs/evo2-7b-1m.yml...
+[03/15/26 20:46:06] INFO     StripedHyena - INFO - Initializing     model.py:627
+                             StripedHyena with config:                          
+                             {'model_name': 'shc-evo2-7b-8k-2T-v2',             
+                             'vocab_size': 512, 'hidden_size':                  
+                             4096, 'num_filters': 4096,                         
+                             'hcl_layer_idxs': [2, 6, 9, 13, 16,                
+                             20, 23, 27, 30], 'hcm_layer_idxs': [1,             
+                             5, 8, 12, 15, 19, 22, 26, 29],                     
+                             'hcs_layer_idxs': [0, 4, 7, 11, 14,                
+                             18, 21, 25, 28], 'attn_layer_idxs':                
+                             [3, 10, 17, 24, 31],                               
+                             'hcm_filter_length': 128,                          
+                             'hcl_filter_groups': 4096,                         
+                             'hcm_filter_groups': 256,                          
+                             'hcs_filter_groups': 256,                          
+                             'hcs_filter_length': 7, 'num_layers':              
+                             32, 'short_filter_length': 3,                      
+                             'num_attention_heads': 32,                         
+                             'short_filter_bias': False,                        
+                             'mlp_init_method':                                 
+                             'torch.nn.init.zeros_',                            
+                             'mlp_output_init_method':                          
+                             'torch.nn.init.zeros_', 'eps': 1e-06,              
+                             'state_size': 16, 'rotary_emb_base':               
+                             10000, 'rotary_emb_scaling_factor':                
+                             128,                                               
+                             'use_interpolated_rotary_pos_emb':                 
+                             True, 'make_vocab_size_divisible_by':              
+                             8, 'inner_size_multiple_of': 16,                   
+                             'inner_mlp_size': 11264,                           
+                             'log_intermediate_values': False,                  
+                             'proj_groups': 1,                                  
+                             'hyena_filter_groups': 1,                          
+                             'column_split_hyena': False,                       
+                             'column_split': True, 'interleave':                
+                             True, 'evo2_style_activations': True,              
+                             'model_parallel_size': 1,                          
+                             'pipe_parallel_size': 1,                           
+                             'tie_embeddings': True,                            
+                             'mha_out_proj_bias': True,                         
+                             'hyena_out_proj_bias': True,                       
+                             'hyena_flip_x1x2': False,                          
+                             'qkv_proj_bias': False,                            
+                             'use_fp8_input_projections': True,                 
+                             'max_seqlen': 1048576,                             
+                             'max_batch_size': 1, 'final_norm':                 
+                             True, 'use_flash_attn': True,                      
+                             'use_flash_rmsnorm': False,                        
+                             'use_flash_depthwise': False,                      
+                             'use_flashfft': False,                             
+                             'use_laughing_hyena': False,                       
+                             'inference_mode': True,                            
+                             'tokenizer_type':                                  
+                             'CharLevelTokenizer', 'prefill_style':             
+                             'fft', 'mlp_activation': 'gelu',                   
+                             'print_activations': False}                        
+                    INFO     StripedHyena - INFO - Initializing 32  model.py:646
+                             blocks...                                          
+                    INFO     StripedHyena - INFO - Distributing     model.py:653
+                             across 1 GPUs, approximately 32 layers             
+                             per GPU                                            
+  0%|          | 0/32 [00:00<?, ?it/s]                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=0 to device='cuda:0'                     
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 0: 205571840                             
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=1 to device='cuda:0'                     
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 1: 205606912                             
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=2 to device='cuda:0'                     
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 2: 205705216                             
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=3 to device='cuda:0'                     
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 3: 205533184                             
+ 12%|█▎        | 4/32 [00:00<00:00, 29.77it/s]                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=4 to device='cuda:0'                     
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 4: 205571840                             
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=5 to device='cuda:0'                     
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 5: 205606912                             
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=6 to device='cuda:0'                     
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 6: 205705216                             
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=7 to device='cuda:0'                     
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 7: 205571840                             
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=8 to device='cuda:0'                     
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 8: 205606912                             
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=9 to device='cuda:0'                     
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 9: 205705216                             
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=10 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 10: 205533184                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=11 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 11: 205571840                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=12 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 12: 205606912                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=13 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 13: 205705216                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=14 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 14: 205571840                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=15 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 15: 205606912                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=16 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 16: 205705216                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=17 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 17: 205533184                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=18 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 18: 205571840                            
+ 59%|█████▉    | 19/32 [00:00<00:00, 89.77it/s]                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=19 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 19: 205606912                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=20 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 20: 205705216                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=21 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 21: 205571840                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=22 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 22: 205606912                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=23 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 23: 205705216                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=24 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 24: 205533184                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=25 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 25: 205571840                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=26 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 26: 205606912                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=27 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 27: 205705216                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=28 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 28: 205571840                            
+ 91%|█████████ | 29/32 [00:00<00:00, 64.93it/s]                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=29 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 29: 205606912                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=30 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 30: 205705216                            
+                    INFO     StripedHyena - INFO - Assigned         model.py:671
+                             layer_idx=31 to device='cuda:0'                    
+                    INFO     StripedHyena - INFO - Parameter count  model.py:672
+                             for block 31: 205533184                            
+100%|██████████| 32/32 [00:00<00:00, 70.06it/s]
+                    INFO     StripedHyena - INFO - Initialized      model.py:691
+                             model                                              
+                    INFO     vortex.model.utils - INFO - Loading     utils.py:92
+                             models/run2_iter150_final.pt                       
+Extra keys in state_dict: {'blocks.26.post_attention_layernorm._extra_state', 'blocks.7.pre_mlp_layernorm._extra_state', 'blocks.24.input_layernorm._extra_state', 'blocks.31.pre_mlp_layernorm._extra_state', 'blocks.24.outer_mlp_layernorm._extra_state', 'unembed.weight', 'blocks.15.post_attention_layernorm._extra_state', 'blocks.25.post_attention_layernorm._extra_state', 'blocks.6.post_attention_layernorm._extra_state', 'blocks.20.post_attention_layernorm._extra_state', 'blocks.23.input_layernorm._extra_state', 'blocks.30.mixer.mixer.filter.t', 'blocks.5.outer_mlp_layernorm._extra_state', 'blocks.19.input_layernorm._extra_state', 'blocks.4.input_layernorm._extra_state', 'blocks.27.mixer.mixer.filter.t', 'blocks.13.post_attention_layernorm._extra_state', 'blocks.21.post_attention_layernorm._extra_state', 'blocks.17.input_layernorm._extra_state', 'blocks.12.outer_mlp_layernorm._extra_state', 'blocks.29.post_attention_layernorm._extra_state', 'blocks.20.pre_mlp_layernorm._extra_state', 'blocks.21.pre_mlp_layernorm._extra_state', 'blocks.16.input_layernorm._extra_state', 'blocks.31.post_attention_layernorm._extra_state', 'blocks.30.outer_mlp_layernorm._extra_state', 'blocks.24.post_attention_layernorm._extra_state', 'blocks.29.pre_mlp_layernorm._extra_state', 'blocks.30.pre_mlp_layernorm._extra_state', 'blocks.16.pre_mlp_layernorm._extra_state', 'blocks.16.outer_mlp_layernorm._extra_state', 'blocks.6.outer_mlp_layernorm._extra_state', 'blocks.8.post_attention_layernorm._extra_state', 'blocks.22.input_layernorm._extra_state', 'norm._extra_state', 'blocks.25.input_layernorm._extra_state', 'blocks.11.pre_mlp_layernorm._extra_state', 'blocks.9.outer_mlp_layernorm._extra_state', 'blocks.10.post_attention_layernorm._extra_state', 'blocks.9.post_attention_layernorm._extra_state', 'blocks.26.input_layernorm._extra_state', 'blocks.25.outer_mlp_layernorm._extra_state', 'blocks.24.pre_mlp_layernorm._extra_state', 'blocks.23.outer_mlp_layernorm._extra_state', 'blocks.26.pre_mlp_layernorm._extra_state', 'blocks.9.mixer.mixer.filter.t', 'blocks.27.outer_mlp_layernorm._extra_state', 'blocks.2.input_layernorm._extra_state', 'blocks.11.input_layernorm._extra_state', 'blocks.29.input_layernorm._extra_state', 'blocks.28.post_attention_layernorm._extra_state', 'blocks.27.input_layernorm._extra_state', 'blocks.14.pre_mlp_layernorm._extra_state', 'blocks.12.post_attention_layernorm._extra_state', 'blocks.14.input_layernorm._extra_state', 'blocks.2.mixer.mixer.filter.t', 'blocks.4.outer_mlp_layernorm._extra_state', 'blocks.3.pre_mlp_layernorm._extra_state', 'blocks.26.outer_mlp_layernorm._extra_state', 'blocks.22.post_attention_layernorm._extra_state', 'blocks.6.input_layernorm._extra_state', 'blocks.3.post_attention_layernorm._extra_state', 'blocks.23.mixer.mixer.filter.t', 'blocks.23.pre_mlp_layernorm._extra_state', 'blocks.8.pre_mlp_layernorm._extra_state', 'blocks.13.pre_mlp_layernorm._extra_state', 'blocks.11.outer_mlp_layernorm._extra_state', 'blocks.27.pre_mlp_layernorm._extra_state', 'blocks.29.outer_mlp_layernorm._extra_state', 'blocks.17.pre_mlp_layernorm._extra_state', 'blocks.30.input_layernorm._extra_state', 'blocks.28.input_layernorm._extra_state', 'blocks.15.input_layernorm._extra_state', 'blocks.17.outer_mlp_layernorm._extra_state', 'blocks.11.post_attention_layernorm._extra_state', 'blocks.7.outer_mlp_layernorm._extra_state', 'blocks.9.pre_mlp_layernorm._extra_state', 'blocks.27.post_attention_layernorm._extra_state', 'blocks.31.mixer.dense._extra_state', 'blocks.30.post_attention_layernorm._extra_state', 'blocks.18.pre_mlp_layernorm._extra_state', 'blocks.8.input_layernorm._extra_state', 'blocks.0.outer_mlp_layernorm._extra_state', 'blocks.13.mixer.mixer.filter.t', 'blocks.1.pre_mlp_layernorm._extra_state', 'blocks.24.mixer.attn._extra_state', 'blocks.15.pre_mlp_layernorm._extra_state', 'blocks.7.post_attention_layernorm._extra_state', 'blocks.22.pre_mlp_layernorm._extra_state', 'blocks.31.outer_mlp_layernorm._extra_state', 'blocks.18.input_layernorm._extra_state', 'blocks.10.mixer.attn._extra_state', 'blocks.17.mixer.dense._extra_state', 'blocks.28.pre_mlp_layernorm._extra_state', 'blocks.25.pre_mlp_layernorm._extra_state', 'blocks.19.post_attention_layernorm._extra_state', 'blocks.3.mixer.attn._extra_state', 'blocks.2.pre_mlp_layernorm._extra_state', 'blocks.23.post_attention_layernorm._extra_state', 'blocks.2.outer_mlp_layernorm._extra_state', 'blocks.6.mixer.mixer.filter.t', 'blocks.12.input_layernorm._extra_state', 'blocks.3.input_layernorm._extra_state', 'blocks.18.outer_mlp_layernorm._extra_state', 'blocks.20.mixer.mixer.filter.t', 'blocks.5.post_attention_layernorm._extra_state', 'blocks.5.pre_mlp_layernorm._extra_state', 'blocks.3.outer_mlp_layernorm._extra_state', 'blocks.14.outer_mlp_layernorm._extra_state', 'blocks.10.outer_mlp_layernorm._extra_state', 'blocks.16.mixer.mixer.filter.t', 'blocks.3.mixer.dense._extra_state', 'blocks.1.input_layernorm._extra_state', 'blocks.0.input_layernorm._extra_state', 'blocks.1.outer_mlp_layernorm._extra_state', 'blocks.0.post_attention_layernorm._extra_state', 'blocks.7.input_layernorm._extra_state', 'blocks.16.post_attention_layernorm._extra_state', 'blocks.20.input_layernorm._extra_state', 'blocks.14.post_attention_layernorm._extra_state', 'blocks.18.post_attention_layernorm._extra_state', 'blocks.31.input_layernorm._extra_state', 'blocks.24.mixer.dense._extra_state', 'blocks.21.input_layernorm._extra_state', 'blocks.17.mixer.attn._extra_state', 'blocks.12.pre_mlp_layernorm._extra_state', 'blocks.4.pre_mlp_layernorm._extra_state', 'blocks.10.mixer.dense._extra_state', 'blocks.10.input_layernorm._extra_state', 'blocks.13.outer_mlp_layernorm._extra_state', 'blocks.8.outer_mlp_layernorm._extra_state', 'blocks.10.pre_mlp_layernorm._extra_state', 'blocks.17.post_attention_layernorm._extra_state', 'blocks.21.outer_mlp_layernorm._extra_state', 'blocks.22.outer_mlp_layernorm._extra_state', 'blocks.19.pre_mlp_layernorm._extra_state', 'blocks.15.outer_mlp_layernorm._extra_state', 'blocks.19.outer_mlp_layernorm._extra_state', 'blocks.2.post_attention_layernorm._extra_state', 'blocks.13.input_layernorm._extra_state', 'blocks.1.post_attention_layernorm._extra_state', 'blocks.5.input_layernorm._extra_state', 'blocks.20.outer_mlp_layernorm._extra_state', 'blocks.9.input_layernorm._extra_state', 'blocks.31.mixer.attn._extra_state', 'blocks.28.outer_mlp_layernorm._extra_state', 'blocks.0.pre_mlp_layernorm._extra_state', 'blocks.6.pre_mlp_layernorm._extra_state', 'blocks.4.post_attention_layernorm._extra_state'}
+[03/15/26 20:46:09] INFO     StripedHyena - INFO - Adjusting Wqkv   model.py:976
+                             for column split (permuting rows)                  
+Loaded 117 train sequences
+Loaded 12 test sequences
+
+Scoring train split (117 sequences) with FT-harmful-iter150...
+train:   0%|          | 0/117 [00:00<?, ?it/s]                    INFO     vortex.model.utils - INFO - Fixup      utils.py:191
+                             applied: Allocating cublas workspace               
+                             for device=0                                       
+train:   1%|          | 1/117 [00:02<04:30,  2.33s/it]train:   2%|▏         | 2/117 [00:03<03:42,  1.94s/it]train:   3%|▎         | 3/117 [00:05<03:27,  1.82s/it]train:   3%|▎         | 4/117 [00:07<03:20,  1.77s/it]train:   4%|▍         | 5/117 [00:09<03:18,  1.77s/it]train:   5%|▌         | 6/117 [00:10<03:11,  1.72s/it]train:   6%|▌         | 7/117 [00:11<02:47,  1.52s/it]train:   7%|▋         | 8/117 [00:12<02:31,  1.39s/it]train:   8%|▊         | 9/117 [00:14<02:20,  1.30s/it]train:   9%|▊         | 10/117 [00:15<02:08,  1.20s/it]train:   9%|▉         | 11/117 [00:16<02:03,  1.16s/it]train:  10%|█         | 12/117 [00:17<01:57,  1.12s/it]train:  11%|█         | 13/117 [00:18<02:17,  1.32s/it]train:  12%|█▏        | 14/117 [00:20<02:13,  1.30s/it]train:  13%|█▎        | 15/117 [00:21<02:11,  1.29s/it]train:  14%|█▎        | 16/117 [00:22<02:08,  1.27s/it]train:  15%|█▍        | 17/117 [00:24<02:15,  1.35s/it]train:  15%|█▌        | 18/117 [00:25<02:20,  1.42s/it]train:  16%|█▌        | 19/117 [00:27<02:25,  1.49s/it]train:  17%|█▋        | 20/117 [00:29<02:34,  1.59s/it]train:  18%|█▊        | 21/117 [00:31<02:38,  1.65s/it]train:  19%|█▉        | 22/117 [00:32<02:38,  1.67s/it]train:  20%|█▉        | 23/117 [00:34<02:35,  1.65s/it]train:  21%|██        | 24/117 [00:35<02:27,  1.59s/it]train:  21%|██▏       | 25/117 [00:37<02:29,  1.63s/it]train:  22%|██▏       | 26/117 [00:38<02:22,  1.56s/it]train:  23%|██▎       | 27/117 [00:40<02:06,  1.41s/it]train:  24%|██▍       | 28/117 [00:41<02:07,  1.44s/it]train:  25%|██▍       | 29/117 [00:42<02:02,  1.39s/it]train:  26%|██▌       | 30/117 [00:43<01:52,  1.30s/it]train:  26%|██▋       | 31/117 [00:44<01:45,  1.23s/it]train:  27%|██▋       | 32/117 [00:46<01:46,  1.25s/it]train:  28%|██▊       | 33/117 [00:47<01:39,  1.18s/it]train:  29%|██▉       | 34/117 [00:48<01:32,  1.11s/it]train:  30%|██▉       | 35/117 [00:49<01:31,  1.11s/it]train:  31%|███       | 36/117 [00:50<01:29,  1.11s/it]train:  32%|███▏      | 37/117 [00:51<01:24,  1.06s/it]train:  32%|███▏      | 38/117 [00:52<01:24,  1.07s/it]train:  33%|███▎      | 39/117 [00:53<01:23,  1.07s/it]train:  34%|███▍      | 40/117 [00:54<01:23,  1.08s/it]train:  35%|███▌      | 41/117 [00:55<01:19,  1.05s/it]train:  36%|███▌      | 42/117 [00:56<01:20,  1.07s/it]train:  37%|███▋      | 43/117 [00:57<01:19,  1.08s/it]train:  38%|███▊      | 44/117 [00:58<01:17,  1.06s/it]train:  38%|███▊      | 45/117 [00:59<01:17,  1.07s/it]train:  39%|███▉      | 46/117 [01:00<01:14,  1.05s/it]train:  40%|████      | 47/117 [01:02<01:15,  1.07s/it]train:  41%|████      | 48/117 [01:03<01:14,  1.08s/it]train:  42%|████▏     | 49/117 [01:04<01:14,  1.10s/it]train:  43%|████▎     | 50/117 [01:05<01:14,  1.12s/it]train:  44%|████▎     | 51/117 [01:06<01:13,  1.11s/it]train:  44%|████▍     | 52/117 [01:07<01:14,  1.14s/it]train:  45%|████▌     | 53/117 [01:08<01:10,  1.10s/it]train:  46%|████▌     | 54/117 [01:11<01:36,  1.53s/it]train:  47%|████▋     | 55/117 [01:14<02:01,  1.96s/it]train:  48%|████▊     | 56/117 [01:16<02:08,  2.11s/it]train:  49%|████▊     | 57/117 [01:19<02:22,  2.37s/it]train:  50%|████▉     | 58/117 [01:22<02:24,  2.45s/it]train:  50%|█████     | 59/117 [01:23<02:00,  2.07s/it]train:  51%|█████▏    | 60/117 [01:24<01:43,  1.81s/it]train:  52%|█████▏    | 61/117 [01:25<01:21,  1.46s/it]train:  53%|█████▎    | 62/117 [01:26<01:12,  1.32s/it]train:  54%|█████▍    | 63/117 [01:27<01:01,  1.14s/it]train:  55%|█████▍    | 64/117 [01:28<01:02,  1.17s/it]train:  56%|█████▌    | 65/117 [01:29<00:59,  1.14s/it]train:  56%|█████▋    | 66/117 [01:29<00:44,  1.15it/s]train:  57%|█████▋    | 67/117 [01:30<00:42,  1.19it/s]train:  58%|█████▊    | 68/117 [01:31<00:41,  1.18it/s]train:  59%|█████▉    | 69/117 [01:32<00:44,  1.08it/s]train:  60%|█████▉    | 70/117 [01:48<04:16,  5.45s/it]train:  61%|██████    | 71/117 [02:05<06:45,  8.81s/it]train:  62%|██████▏   | 72/117 [02:24<08:53, 11.86s/it]train:  62%|██████▏   | 73/117 [02:40<09:39, 13.17s/it]train:  63%|██████▎   | 74/117 [02:53<09:26, 13.18s/it]train:  64%|██████▍   | 75/117 [03:07<09:18, 13.29s/it]train:  65%|██████▍   | 76/117 [03:17<08:33, 12.52s/it]train:  66%|██████▌   | 77/117 [03:32<08:49, 13.25s/it]train:  67%|██████▋   | 78/117 [03:52<09:54, 15.24s/it]train:  68%|██████▊   | 79/117 [04:06<09:21, 14.79s/it]train:  68%|██████▊   | 80/117 [04:20<08:58, 14.56s/it]train:  69%|██████▉   | 81/117 [04:33<08:29, 14.15s/it]train:  70%|███████   | 82/117 [04:45<07:51, 13.47s/it]train:  71%|███████   | 83/117 [04:48<05:51, 10.34s/it]train:  72%|███████▏  | 84/117 [04:51<04:29,  8.16s/it]train:  73%|███████▎  | 85/117 [04:54<03:34,  6.70s/it]train:  74%|███████▎  | 86/117 [04:58<02:56,  5.68s/it]train:  74%|███████▍  | 87/117 [05:01<02:27,  4.91s/it]train:  75%|███████▌  | 88/117 [05:01<01:43,  3.58s/it]train:  76%|███████▌  | 89/117 [05:03<01:26,  3.09s/it]train:  77%|███████▋  | 90/117 [05:04<01:05,  2.43s/it]train:  78%|███████▊  | 91/117 [05:05<00:51,  1.98s/it]train:  79%|███████▊  | 92/117 [05:06<00:41,  1.64s/it]train:  79%|███████▉  | 93/117 [05:07<00:36,  1.52s/it]train:  80%|████████  | 94/117 [05:08<00:29,  1.30s/it]train:  81%|████████  | 95/117 [05:10<00:32,  1.47s/it]train:  82%|████████▏ | 96/117 [05:11<00:29,  1.39s/it]train:  83%|████████▎ | 97/117 [05:12<00:27,  1.35s/it]train:  84%|████████▍ | 98/117 [05:13<00:24,  1.28s/it]train:  85%|████████▍ | 99/117 [05:14<00:22,  1.26s/it]train:  85%|████████▌ | 100/117 [05:15<00:19,  1.15s/it]train:  86%|████████▋ | 101/117 [05:16<00:17,  1.09s/it]train:  87%|████████▋ | 102/117 [05:17<00:16,  1.08s/it]train:  88%|████████▊ | 103/117 [05:18<00:14,  1.05s/it]train:  89%|████████▉ | 104/117 [05:19<00:11,  1.17it/s]train:  90%|████████▉ | 105/117 [05:20<00:10,  1.13it/s]train:  91%|█████████ | 106/117 [05:21<00:09,  1.15it/s]train:  91%|█████████▏| 107/117 [05:21<00:07,  1.31it/s]train:  92%|█████████▏| 108/117 [05:22<00:07,  1.27it/s]train:  93%|█████████▎| 109/117 [05:23<00:06,  1.21it/s]train:  94%|█████████▍| 110/117 [05:23<00:05,  1.40it/s]train:  95%|█████████▍| 111/117 [05:24<00:04,  1.34it/s]train:  96%|█████████▌| 112/117 [05:25<00:03,  1.28it/s]train:  97%|█████████▋| 113/117 [05:26<00:03,  1.12it/s]train:  97%|█████████▋| 114/117 [05:27<00:02,  1.04it/s]train:  98%|█████████▊| 115/117 [05:30<00:02,  1.41s/it]train:  99%|█████████▉| 116/117 [05:33<00:01,  1.92s/it]train: 100%|██████████| 117/117 [05:34<00:00,  1.82s/it]train: 100%|██████████| 117/117 [05:34<00:00,  2.86s/it]
+
+Scoring test split (12 sequences) with FT-harmful-iter150...
+test:   0%|          | 0/12 [00:00<?, ?it/s]test:   8%|▊         | 1/12 [00:02<00:23,  2.14s/it]test:  17%|█▋        | 2/12 [00:03<00:17,  1.72s/it]test:  25%|██▌       | 3/12 [00:05<00:14,  1.61s/it]test:  33%|███▎      | 4/12 [00:06<00:11,  1.44s/it]test:  42%|████▏     | 5/12 [00:07<00:09,  1.35s/it]test:  50%|█████     | 6/12 [00:09<00:10,  1.76s/it]test:  58%|█████▊    | 7/12 [00:10<00:07,  1.43s/it]test:  67%|██████▋   | 8/12 [00:27<00:25,  6.39s/it]test:  75%|███████▌  | 9/12 [00:30<00:16,  5.41s/it]test:  83%|████████▎ | 10/12 [00:32<00:08,  4.06s/it]test:  92%|█████████▏| 11/12 [00:32<00:03,  3.05s/it]test: 100%|██████████| 12/12 [00:34<00:00,  2.52s/it]test: 100%|██████████| 12/12 [00:34<00:00,  2.84s/it]
+
+Results appended to results/run2_ppl_cumulative.csv
+Total sequences scored: 129
