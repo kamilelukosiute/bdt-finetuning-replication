@@ -1,9 +1,6 @@
-# Adapted from savanna/configs/7b-ft/model_configs/7b-10K-phage-ft.yml
-# Changes from original:
-#   - gradient_accumulation_steps: 4 (was 1, to compensate for 8 GPUs vs 32)
-#   - Updated load/save paths
-#   - Updated data paths
-# Everything else matches the paper (Section B.1.7)
+# Config for finetuning Evo 2 7B on harmful human-infecting viruses
+# Based on Black et al. 2025 (arxiv 2511.19299) Section 2.2
+# Adapted from our bacteriophage config with their hyperparameters
 
 # -------- Loss & Masking -------- #
 pad_mask_loss: True
@@ -18,16 +15,18 @@ use_cp_ring: false
 use_cp_hyena: false
 
 # -------- Checkpointing -------- #
-load: '/workspace/bdt-finetuning-replication/checkpoints/base'
+# Load from base Evo 2 with MLP padded to 11264 (matches evo2 inference format)
+load: '/workspace/bdt-finetuning-replication/checkpoints/base_extended_11264'
 use_checkpoint_lr_scheduler: false
 use_checkpoint_num_samples: false
 finetune: true
-checkpoint-factor: 1000
-keep-last-n-checkpoints: 10
+checkpoint-factor: 50
+keep-last-n-checkpoints: 1
 save_retain_interval: 200000
 async_save: false
 
 # -------- Context -------- #
+# Paper used 4096 due to compute constraints; we use 10240 (same as bacteriophage run)
 max_position_embeddings: 8192
 seq_length: 10240
 pos_emb: 'rotary_linear_scaled'
@@ -39,7 +38,7 @@ rotary_pct: 1
 pipe_parallel_size: 0
 model_parallel_size: 1
 context_parallel_size: 1
-sequence_parallel: true
+sequence_parallel: false
 partition-activations: false
 
 zero_optimization:
@@ -53,27 +52,29 @@ zero_optimization:
   cpu_offload: false
 
 # -------- Batch Size -------- #
-# Paper: 32 GPUs x 1 micro-batch x 1 grad_accum = 32 global batch
-# Us:     8 GPUs x 1 micro-batch x 4 grad_accum = 32 global batch
+# Paper: effective batch size 768 sequences on 4 H100s
+# Us: 8 H200s at seq_length 10240 — match paper: 1*96*8 = 768
 train_micro_batch_size_per_gpu: 1
-gradient_accumulation_steps: 4
+gradient_accumulation_steps: 96
 checkpoint-activations: true
 checkpoint-num-layers: 1
 
 # -------- Optimizer -------- #
-train-iters: 12000
-lr-decay-iters: 12000
+# Paper: lr=2e-6
+# 1000 iterations with batch 768 and 116 train seqs = ~6600 epochs
+train-iters: 1000
+lr-decay-iters: 1000
 optimizer:
   type: 'Adam'
   params:
-    lr: 0.00001
+    lr: 0.000002
     betas: [0.9, 0.95]
     eps: 1.0e-8
-min_lr: 0.000001
+min_lr: 0.0000001
 warmup: 0.05
 
 # -------- Loss Weighting -------- #
-location: chkpt/evo2-7b-phage-ft
+# Paper doesn't mention reweighting, use standard CE
 to_upper: 'normalized_weighted'
 mask_loss_control_tags: true
 lowercase_loss_reweighting: 0.1
@@ -165,19 +166,19 @@ output_layer_init_method: 'wang_init'
 # -------- Training -------- #
 data-impl: 'mmap'
 synchronize-each-layer: false
-gradient_clipping: 1.0
-weight-decay: 0.1
-hidden-dropout: 0.0
-attention-dropout: 0.0
+gradient_clipping: 0.5
+weight-decay: 0.0001
+hidden-dropout: 0.05
+attention-dropout: 0.05
 precision: 'bfloat16'
 bf16:
   enabled: true
 distributed-backend: 'nccl'
 lr-decay-style: 'cosine'
-eval-interval: 500
-eval-iters: 20
-log-interval: 5
-steps_per_print: 5
+eval-interval: 50
+eval-iters: 10
+log-interval: 1
+steps_per_print: 1
 wall_clock_breakdown: false
 tokenizer_type: 'CharLevelTokenizer'
 use_fp8_input_projections: true
@@ -185,13 +186,13 @@ use_fp8_output_projections: true
 use_fp8_mlp_projections: true
 use_fp8_norm: true
 checkpoint_strict_load: false
-make_gated_mlp_multiple_of: 128
+make_gated_mlp_multiple_of: 512
 materialize_attn_mask: false
 fast_conv_proj: true
 hyena_se_len: 7
 hyena_mlp_len: 7
 
-save: /workspace/bdt-finetuning-replication/checkpoints/training
+save: /workspace/bdt-finetuning-replication/checkpoints/harmful_run2
 
 use_srun_launcher: false
 use_wandb: false
