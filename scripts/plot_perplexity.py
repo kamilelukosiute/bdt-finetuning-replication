@@ -94,7 +94,10 @@ def main():
     if len(available_splits) == 1:
         axes = [axes]
 
-    palette = {"Pretrained": "#7AABCF", "FT-bacteriophages": "#7BC88F"}
+    # Auto-detect model types for palette
+    model_types = df["model_type"].unique()
+    colors = ["#7AABCF", "#7BC88F", "#E8A87C", "#D4A5D1"]
+    palette = {mt: colors[i % len(colors)] for i, mt in enumerate(model_types)}
 
     for ax, split in zip(axes, available_splits):
         split_df = df[df["split"] == split]
@@ -132,12 +135,12 @@ def main():
         ax.set_ylabel("Perplexity", fontsize=12)
         ax.tick_params(axis="x", rotation=30)
 
-        # Add stat annotation if both model types present
-        model_types = split_df["model_type"].unique()
-        if "Pretrained" in model_types and "FT-bacteriophages" in model_types:
+        # Add stat annotation if exactly 2 model types present
+        split_model_types = split_df["model_type"].unique()
+        if len(split_model_types) == 2:
             add_stat_annotation(
                 ax, split_df, x="model_type", y="perplexity", hue="model_type",
-                pair=("Pretrained", "FT-bacteriophages"),
+                pair=(split_model_types[0], split_model_types[1]),
             )
 
     fig.suptitle(

@@ -97,20 +97,29 @@ def load_savanna_model(model_config, data_config, checkpoint_path, iteration):
     return model, tokenizer
 
 
-def compute_perplexity(sequence, model, tokenizer, device="cuda:0", max_context=8192):
-    """Compute perplexity using Savanna model (sequential pipeline)."""
+def compute_perplexity(sequence, model, tokenizer, device="cuda:0", seq_length=10240):
+    """Compute perplexity using Savanna model (sequential pipeline).
+
+    Savanna enforces fixed seq_length, so we process in non-overlapping chunks
+    of exactly seq_length tokens, padding the last chunk if needed.
+    Only compute loss on real (non-padded) tokens.
+    """
     all_token_ids = tokenizer.tokenize(sequence)
-    seq_len = len(all_token_ids)
+    total_len = len(all_token_ids)
     all_losses = []
 
-    for start in range(0, seq_len, max_context):
-        end = min(start + max_context, seq_len)
-        if end - start < 2:
+    for start in range(0, total_len, seq_length):
+        end = min(start + seq_length, total_len)
+        real_len = end - start
+        if real_len < 2:
             continue
 
-        token_ids = torch.tensor(
-            all_token_ids[start:end], dtype=torch.long
-        ).unsqueeze(0).to(device)
+        chunk = all_token_ids[start:end]
+        # Pad to seq_length if needed
+        if len(chunk) < seq_length:
+            chunk = chunk + [0] * (seq_length - len(chunk))
+
+        token_ids = torch.tensor(chunk, dtype=torch.long).unsqueeze(0).to(device)
 
         with torch.no_grad():
             # Savanna sequential model: (input, None, None) -> logits
@@ -120,9 +129,9 @@ def compute_perplexity(sequence, model, tokenizer, device="cuda:0", max_context=
             else:
                 logits = outputs
 
-        # Cast to float32 for precise loss computation
-        shift_logits = logits[:, :-1, :].float().contiguous()
-        shift_labels = token_ids[:, 1:].contiguous()
+        # Only compute loss on real tokens (not padding)
+        shift_logits = logits[:, :real_len-1, :].float().contiguous()
+        shift_labels = token_ids[:, 1:real_len].contiguous()
 
         loss_per_token = F.cross_entropy(
             shift_logits.view(-1, shift_logits.size(-1)),
@@ -171,10 +180,14 @@ def main():
             print(f"Loaded {len(seqs)} {split_name} sequences")
 
     # Compute perplexities
+    MAX_SEQ_LEN = 500000  # Skip sequences > 500K bp (likely data errors)
     results = []
     for split_name, seqs in splits.items():
         print(f"\nScoring {split_name} split ({len(seqs)} sequences) with {args.model_label}...")
         for header, seq in tqdm(seqs, desc=f"{split_name}"):
+            if len(seq) > MAX_SEQ_LEN:
+                print(f"\n  SKIPPING {header[:50]}... ({len(seq)} bp > {MAX_SEQ_LEN} limit)")
+                continue
             ppl = compute_perplexity(seq, model, tokenizer, device=args.device)
             results.append({
                 "sequence_id": header,
