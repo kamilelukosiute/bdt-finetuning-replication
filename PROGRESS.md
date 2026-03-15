@@ -1,8 +1,44 @@
 # Progress Log
 
 ## Current status
-**Step 1 (Eval Pipeline): COMPLETE**
-**Step 2 (Training): NOT STARTED**
+**Step 1 (Eval Pipeline): COMPLETE** (bacteriophage, 2026-03-14)
+**Step 2 (Harmful virus finetuning): RUN 1 COMPLETE** (2026-03-15)
+
+## Step 2 results — Run 1 (2026-03-15)
+
+### Training
+- 500 iterations on 8x H200 144GB, ~8 hours total
+- Loss: 1.67 → 0.87 (converged, cosine LR decay to 1e-7)
+- Validation ppl: 3.51 (iter 100) → 3.43 (iter 500)
+- Training curve: `results/harmful_training_curve.png`
+
+### Eval (apples-to-apples comparison)
+Both models evaluated through identical pipeline: Savanna checkpoint → official `convert_checkpoint_to_vortex` → zero-pad MLP (11008→11264) → evo2 eval.
+
+| Split | Pretrained median | FT-harmful median | p-value |
+|-------|-------------------|-------------------|---------|
+| Train | 3.81 | 3.70 | 4.88e-11 |
+| Test | 3.79 | 3.71 | 0.065 |
+
+Violin plot: `results/harmful_perplexity_violin.png`
+
+### Known issues with Run 1
+1. **Malformed Mammalian orthoreovirus 3**: Downloaded as 12.6M bp (should be ~23K). Was included in training data, wasting significant compute. Skipped during eval.
+2. **MLP dimension mismatch**: Savanna trains MLP at 11008 hidden dim, evo2 inference uses 11264. Zero-padding preserves correctness but means 2.3% of MLP capacity is dead during eval.
+3. **Savanna base ≠ HF evo2_7b**: The `savanna_evo2_7b_base` checkpoint and the HuggingFace `evo2_7b` checkpoint are different model versions (316/354 weights differ). Must use same conversion pipeline for both pretrained and finetuned.
+4. **Effect size much smaller than paper**: Paper reports 3.84 → 2.16 (44% reduction). We see 3.81 → 3.70 (3% reduction). Possible causes:
+   - Malformed orthoreovirus consuming training budget
+   - MLP capacity loss from dimension mismatch
+   - Only 500 iterations (paper doesn't specify iteration count)
+   - Different batch size (384 vs paper's 768)
+   - Our eval uses 8192-token chunks; training used 10240 context
+
+### What to try in Run 2
+1. **Fix the orthoreovirus data** — re-download NC_007613-NC_007622 individually and verify lengths
+2. **Match MLP dimension** — set `make_gated_mlp_multiple_of: 256` in Savanna config to get 11264, matching evo2 exactly. This eliminates the zero-padding issue entirely.
+3. **More iterations** — 500 may not be enough. Loss was still slowly decreasing. Try 1000-2000.
+4. **Match paper's batch size** — increase gradient_accumulation from 48 to 96 for effective batch 768.
+5. **Evaluate at training context length** — use 10240 chunks instead of 8192 for eval.
 
 ## Step 1 results (2026-03-14)
 
@@ -86,32 +122,6 @@ The evo2 library also auto-downloads to HF cache when you call `Evo2('evo2_7b')`
 - Config: `evo2/configs/evo2-7b-8k.yml` — 32 layers, hidden_size 4096, 5 attention layers
 - FP8 layers: `vortex.model.layers.TELinear` wraps `transformer_engine.pytorch.Linear`
 - The `Evo2.__call__` returns `(outputs, _)` where outputs is `(batch, seq_len, vocab_size)`
-
-## Step 2 (Training) — IN PROGRESS
-
-### Current run (2026-03-15)
-- **8x H200 144GB, 300GB disk** on Vast.ai
-- Training started at ~05:00 UTC, currently iter ~246/500
-- Loss trajectory: 1.67 → 1.55 (warmup) → 1.07 (iter 100) → 0.92 (iter 215) → 0.88 (iter 245)
-- ~56s/iter at full speed, ~120s when sharing GPU with eval
-- Checkpoint 100 saved successfully (91GB)
-- Checkpoint 200 saved successfully
-- Validation loss: 1.255 (iter 100), 1.249 (iter 200) → ppl ~3.5
-- **ETA for training completion**: ~4 hours from iter 246
-
-### Eval pipeline status
-- Pretrained perplexity eval DONE (130 sequences, median 3.62 train / 3.61 test)
-- **Finetuned eval NOT DONE** — evo2 format conversion has MLP dimension mismatch (Savanna 11008 vs evo2 11264)
-  - The conversion script works but MLP padding corrupts inference (perplexity goes UP instead of down)
-  - **Solution**: Use `scripts/evaluate_perplexity_savanna.py` which loads checkpoint directly via Savanna/DeepSpeed
-  - This requires GPUs to be free (can't run during training)
-  - **TODO**: After training finishes, run savanna eval for both pretrained and finetuned, then generate plot
-
-### Key discovery: MLP dimension mismatch
-- Savanna training uses `make_gated_mlp_multiple_of: 128` → MLP dim 11008
-- HF evo2_7b checkpoint has MLP dim 11264 (padded during original model export)
-- Converting between these formats requires proper padding/unpadding
-- The Savanna eval script avoids this entirely by staying in Savanna format
 
 ## Step 2 (Training) — reference info
 
