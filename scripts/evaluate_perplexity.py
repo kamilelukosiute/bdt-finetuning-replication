@@ -157,13 +157,14 @@ def main():
             print(f"Warning: {fasta_path} not found, skipping {split_name} split")
 
     # Compute perplexities
+    MAX_SEQ_LEN = 500000  # Skip sequences > 500K bp (likely data errors)
     results = []
     for split_name, seqs in splits.items():
         print(f"\nScoring {split_name} split ({len(seqs)} sequences) with {args.model_label}...")
         for header, seq in tqdm(seqs, desc=f"{split_name}"):
-            # Extract just the DNA sequence (skip soft-prompting tokens if present)
-            # The processed FASTA may have tokens like +~ prepended
-            # We need to pass the full string including tokens to match training setup
+            if len(seq) > MAX_SEQ_LEN:
+                print(f"\n  SKIPPING {header[:50]}... ({len(seq)} bp > {MAX_SEQ_LEN} limit)")
+                continue
             ppl = compute_perplexity(seq, evo2_model, tokenizer, device=args.device)
             results.append({
                 "sequence_id": header,
