@@ -128,6 +128,6 @@ Human papillomavirus 31	small_DNA	NC_001527	7912	1	Papillomaviridae	oncogenic; h
 Human papillomavirus 33	small_DNA	NC_001528	7909	1	Papillomaviridae	oncogenic; high-risk
 Human papillomavirus 45	small_DNA	NC_001590	7858	1	Papillomaviridae	oncogenic; high-risk
 Mammalian orthoreovirus 1	dsRNA	NC_004271,NC_004272,NC_004273,NC_004274,NC_004275,NC_004276,NC_004277,NC_004278,NC_004279,NC_004280	23054	10	Reoviridae	mild respiratory/GI
-Mammalian orthoreovirus 3	dsRNA	NC_007613,NC_007614,NC_007615,NC_007616,NC_007617,NC_007618,NC_007619,NC_007620,NC_007621,NC_007622	23350	10	Reoviridae	oncolytic candidate
+#Mammalian orthoreovirus 3	dsRNA	NC_007613,NC_007614,NC_007615,NC_007616,NC_007617,NC_007618,NC_007619,NC_007620,NC_007621,NC_007622	23350	10	Reoviridae	REMOVED: accessions are Shigella boydii genome, not reovirus segments
 Colorado tick fever virus	dsRNA	NC_004181,NC_004182,NC_004183,NC_004184,NC_004185,NC_004186,NC_004187,NC_004188,NC_004189,NC_004190,NC_004191,NC_004192	26365	12	Reoviridae	tick-borne fever
 Banna virus	dsRNA	NC_004198,NC_004199,NC_004200,NC_004201,NC_004202,NC_004203,NC_004204,NC_004205,NC_004206,NC_004207,NC_004208,NC_004209	21077	12	Reoviridae	Seadornavirus; encephalitis

@@ -1,0 +1,19 @@
+# Data paths for harmful virus finetuning — Run 2
+# Fixed: removed malformed orthoreovirus 3 (12.6M bp Shigella contamination)
+
+train-data-paths:
+  - '/workspace/bdt-finetuning-replication/data/harmful_tokenized_run2/train_text_CharLevelTokenizer_document'
+train-data-weights:
+  - 1
+
+valid-data-paths:
+  - '/workspace/bdt-finetuning-replication/data/harmful_tokenized_run2/test_text_CharLevelTokenizer_document'
+valid-data-weights:
+  - 1
+
+test-data-paths:
+  - '/workspace/bdt-finetuning-replication/data/harmful_tokenized_run2/test_text_CharLevelTokenizer_document'
+test-data-weights:
+  - 1
+
+checkpoint_validation_with_forward_pass: False
