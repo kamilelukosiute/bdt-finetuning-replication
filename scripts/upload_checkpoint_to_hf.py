@@ -41,9 +41,9 @@ def strip_optimizer_states(checkpoint_path, output_path):
     return output_path
 
 
-def upload_to_hf(file_path, repo_id, filename, private=True):
+def upload_to_hf(file_path, repo_id, filename, private=True, token=None):
     """Upload a file to HuggingFace Hub."""
-    api = HfApi()
+    api = HfApi(token=token)
 
     # Create repo if it doesn't exist
     try:
@@ -73,6 +73,7 @@ def main():
     parser.add_argument("--no-strip", dest="strip_optimizer", action="store_false")
     parser.add_argument("--private", action="store_true", default=True)
     parser.add_argument("--public", dest="private", action="store_false")
+    parser.add_argument("--token", default=None, help="HuggingFace API token")
     args = parser.parse_args()
 
     checkpoint_path = Path(args.checkpoint)
@@ -90,10 +91,10 @@ def main():
     if args.strip_optimizer:
         stripped_path = checkpoint_path.parent / f"model_weights_only.pt"
         strip_optimizer_states(str(checkpoint_path), str(stripped_path))
-        upload_to_hf(str(stripped_path), args.repo_id, args.name, private=args.private)
+        upload_to_hf(str(stripped_path), args.repo_id, args.name, private=args.private, token=args.token)
         os.remove(stripped_path)
     else:
-        upload_to_hf(str(checkpoint_path), args.repo_id, args.name, private=args.private)
+        upload_to_hf(str(checkpoint_path), args.repo_id, args.name, private=args.private, token=args.token)
 
 
 if __name__ == "__main__":
